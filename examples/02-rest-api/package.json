@@ -9,7 +9,7 @@
     "dev": "node --watch index.js"
   },
   "keywords": ["racejs", "example", "rest-api", "crud"],
-  "author": "Dhananjay Latpate <dhananjaylatpate@resellix.com>",
+  "author": "Dhananjay Latpate <dhananjaylatpate@resillix.com>",
   "license": "MIT",
   "dependencies": {
     "@racejs/core": "workspace:*"

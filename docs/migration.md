@@ -326,10 +326,10 @@ autocannon -c 100 -d 30 http://localhost:3001
 
 ## Support
 
-- GitHub Issues: https://github.com/resellix/racejs/issues
-- Discussions: https://github.com/resellix/racejs/discussions
-- Documentation: https://github.com/resellix/racejs
-- Email: dhananjaylatpate@resellix.com
+- GitHub Issues: https://github.com/resillix/racejs/issues
+- Discussions: https://github.com/resillix/racejs/discussions
+- Documentation: https://github.com/resillix/racejs
+- Email: dhananjaylatpate@resillix.com
 
 ## Next Steps
 

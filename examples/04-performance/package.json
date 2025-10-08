@@ -10,7 +10,7 @@
     "bench": "node index.js & sleep 2 && autocannon -c 100 -d 30 http://localhost:3000/benchmark"
   },
   "keywords": ["racejs", "example", "performance", "optimization"],
-  "author": "Dhananjay Latpate <dhananjaylatpate@resellix.com>",
+  "author": "Dhananjay Latpate <dhananjaylatpate@resillix.com>",
   "license": "MIT",
   "dependencies": {
     "@racejs/core": "workspace:*"

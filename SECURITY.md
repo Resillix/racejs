@@ -9,13 +9,13 @@ project.
 
 ## Reporting a Bug
 
-The Resellix team takes all security bugs in RaceJS seriously.
+The Resillix team takes all security bugs in RaceJS seriously.
 Thank you for improving the security of RaceJS. We appreciate your efforts and
 responsible disclosure and will make every effort to acknowledge your
 contributions.
 
-Report security bugs by emailing **security@resellix.com** or through our
-[GitHub Security Advisories](https://github.com/resellix/racejs/security/advisories/new).
+Report security bugs by emailing **security@resillix.com** or through our
+[GitHub Security Advisories](https://github.com/resillix/racejs/security/advisories/new).
 
 To ensure the timely response to your report, please ensure that the entirety
 of the report is contained within the email body and not solely behind a web
@@ -51,7 +51,7 @@ involving the following steps:
 
 We are developing a comprehensive security model for RaceJS. As we maintain Express compatibility, 
 we also follow security best practices from the Express.js ecosystem. Our security documentation 
-will be published at [https://github.com/resellix/racejs/security](https://github.com/resellix/racejs/security).
+will be published at [https://github.com/resillix/racejs/security](https://github.com/resillix/racejs/security).
 
 ## Comments on this Policy
 

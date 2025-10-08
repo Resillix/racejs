@@ -9,7 +9,7 @@
     "both": "npm run express-compat & npm run native"
   },
   "keywords": ["racejs", "example", "express", "migration"],
-  "author": "Dhananjay Latpate <dhananjaylatpate@resellix.com>",
+  "author": "Dhananjay Latpate <dhananjaylatpate@resillix.com>",
   "license": "MIT",
   "dependencies": {
     "@racejs/core": "workspace:*",

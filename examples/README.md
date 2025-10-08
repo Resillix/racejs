@@ -225,22 +225,22 @@ MIT License - see [LICENSE](../LICENSE) for details.
 ## 👨‍💻 Author
 
 **Dhananjay Latpate**  
-Email: dhananjaylatpate@resellix.com  
-Organization: [Resellix](https://github.com/resellix)
+Email: dhananjaylatpate@resillix.com  
+Organization: [Resillix](https://github.com/resillix)
 
 ## 🔗 Links
 
-- [GitHub Repository](https://github.com/resellix/racejs)
-- [Issues](https://github.com/resellix/racejs/issues)
-- [Discussions](https://github.com/resellix/racejs/discussions)
+- [GitHub Repository](https://github.com/resillix/racejs)
+- [Issues](https://github.com/resillix/racejs/issues)
+- [Discussions](https://github.com/resillix/racejs/discussions)
 - [npm Package](https://www.npmjs.com/package/@racejs/core)
 
 ## 🎓 Need Help?
 
 - 📖 Read the [documentation](../README.md)
-- 💬 Join [discussions](https://github.com/resellix/racejs/discussions)
-- 🐛 Report [issues](https://github.com/resellix/racejs/issues)
-- 📧 Email: dhananjaylatpate@resellix.com
+- 💬 Join [discussions](https://github.com/resillix/racejs/discussions)
+- 🐛 Report [issues](https://github.com/resillix/racejs/issues)
+- 📧 Email: dhananjaylatpate@resillix.com
 
 ---
 

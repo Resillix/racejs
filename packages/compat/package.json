@@ -23,16 +23,16 @@
     "compatibility",
     "migration",
     "express4",
-    "resellix"
+    "resillix"
   ],
-  "author": "Dhananjay Latpate <dhananjaylatpate@resellix.com>",
+  "author": "Dhananjay Latpate <dhananjaylatpate@resillix.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/resellix/racejs.git",
+    "url": "https://github.com/resillix/racejs.git",
     "directory": "packages/compat"
   },
-  "homepage": "https://github.com/resellix/racejs#readme",
+  "homepage": "https://github.com/resillix/racejs#readme",
   "engines": {
     "node": ">=18.0.0"
   },

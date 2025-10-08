@@ -8,7 +8,7 @@ This document explains the internal architecture of RaceJS (`@racejs/core`) and 
 2. **API Compatibility**: Express 4.x compatible via `@racejs/compat`
 3. **Zero Config**: Works out of the box for simple apps
 4. **Opt-In Complexity**: Advanced features behind feature flags
-5. **Production Ready**: Built by [Resellix](https://resellix.com) for real-world applications
+5. **Production Ready**: Built by [Resillix](https://resillix.com) for real-world applications
 
 ## Core Components
 

@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org)
 
-**RaceJS** is a high-performance web framework for Node.js, designed and developed by [Resellix](https://resellix.com), a software startup focused on building cutting-edge developer tools.
+**RaceJS** is a high-performance web framework for Node.js, designed and developed by [Resillix](https://resillix.com), a software startup focused on building cutting-edge developer tools.
 
 ## 🚀 Why RaceJS?
 
@@ -201,18 +201,18 @@ We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for de
 
 ## 📄 License
 
-MIT © [Dhananjay Latpate](mailto:dhananjaylatpate@resellix.com)
+MIT © [Dhananjay Latpate](mailto:dhananjaylatpate@resillix.com)
 
 ## 👨‍💻 Author
 
 **Dhananjay Latpate**
-- 📧 Email: dhananjaylatpate@resellix.com
-- 🏢 Company: [Resellix](https://resellix.com)
-- 💼 GitHub: [@resellix](https://github.com/resellix)
+- 📧 Email: dhananjaylatpate@resillix.com
+- 🏢 Company: [Resillix](https://resillix.com)
+- 💼 GitHub: [@resillix](https://github.com/resillix)
 
-## 🏢 About Resellix
+## 🏢 About Resillix
 
-RaceJS is developed and maintained by [Resellix](https://resellix.com), a software startup building next-generation developer tools. We're passionate about performance, developer experience, and open source.
+RaceJS is developed and maintained by [Resillix](https://resillix.com), a software startup building next-generation developer tools. We're passionate about performance, developer experience, and open source.
 
 ## 🚀 Growth Strategy
 
@@ -220,8 +220,8 @@ Interested in how we plan to grow RaceJS into a global framework? Check out our 
 
 ---
 
-**Built with ⚡️ by [Dhananjay Latpate](mailto:dhananjaylatpate@resellix.com) and the RaceJS community**
+**Built with ⚡️ by [Dhananjay Latpate](mailto:dhananjaylatpate@resillix.com) and the RaceJS community**
 
-- 🌐 Website: [resellix.com](https://resellix.com)
-- 📧 Email: contact@resellix.com
-- 💼 GitHub: [@resellix](https://github.com/resellix)
+- 🌐 Website: [resillix.com](https://resillix.com)
+- 📧 Email: contact@resillix.com
+- 💼 GitHub: [@resillix](https://github.com/resillix)

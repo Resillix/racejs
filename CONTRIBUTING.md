@@ -4,7 +4,7 @@ Thank you for your interest in contributing to RaceJS! This document provides gu
 
 ## 🏢 About RaceJS
 
-RaceJS is developed by [Resellix](https://resellix.com), a software startup building high-performance developer tools. We welcome community contributions to make RaceJS even better!
+RaceJS is developed by [Resillix](https://resillix.com), a software startup building high-performance developer tools. We welcome community contributions to make RaceJS even better!
 
 ## 🎯 Project Goals
 
@@ -391,7 +391,7 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 **Thank you for contributing to RaceJS! 🙏**
 
-**Built with ⚡️ by [Dhananjay Latpate](mailto:dhananjaylatpate@resellix.com) and the RaceJS community**
+**Built with ⚡️ by [Dhananjay Latpate](mailto:dhananjaylatpate@resillix.com) and the RaceJS community**
 
-**Founder**: Dhananjay Latpate <dhananjaylatpate@resellix.com>  
-**Company**: [Resellix](https://resellix.com)
+**Founder**: Dhananjay Latpate <dhananjaylatpate@resillix.com>  
+**Company**: [Resillix](https://resillix.com)

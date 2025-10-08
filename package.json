@@ -2,15 +2,15 @@
   "name": "racejs",
   "description": "⚡️ Ultra-fast, Express-compatible Node.js web framework built for performance",
   "version": "1.0.0",
-  "author": "Dhananjay Latpate <dhananjaylatpate@resellix.com>",
+  "author": "Dhananjay Latpate <dhananjaylatpate@resillix.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/resellix/racejs.git"
+    "url": "https://github.com/resillix/racejs.git"
   },
-  "homepage": "https://github.com/resellix/racejs",
+  "homepage": "https://github.com/resillix/racejs",
   "bugs": {
-    "url": "https://github.com/resellix/racejs/issues"
+    "url": "https://github.com/resillix/racejs/issues"
   },
   "type": "module",
   "keywords": [
