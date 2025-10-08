@@ -29,7 +29,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/resillix/racejs.git",
+    "url": "git+https://github.com/resillix/racejs.git",
     "directory": "packages/compat"
   },
   "homepage": "https://github.com/resillix/racejs#readme",
