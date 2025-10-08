@@ -1,0 +1,46 @@
+{
+  "name": "@racejs/compat",
+  "version": "1.0.0",
+  "description": "⚡️ Express 4.x compatibility layer for RaceJS",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "racejs",
+    "race",
+    "express",
+    "compatibility",
+    "migration",
+    "express4",
+    "resellix"
+  ],
+  "author": "Dhananjay Latpate <dhananjaylatpate@resellix.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/resellix/racejs.git",
+    "directory": "packages/compat"
+  },
+  "homepage": "https://github.com/resellix/racejs#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@racejs/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.2.0"
+  }
+}

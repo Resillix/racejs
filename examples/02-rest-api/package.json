@@ -1,0 +1,17 @@
+{
+  "name": "racejs-rest-api",
+  "version": "1.0.0",
+  "description": "Complete REST API example with RaceJS",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": ["racejs", "example", "rest-api", "crud"],
+  "author": "Dhananjay Latpate <dhananjaylatpate@resellix.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@racejs/core": "workspace:*"
+  }
+}

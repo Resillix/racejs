@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Integration Tests",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/test-integration.js",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Hello World Example",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/examples/hello-world-perf/index.js",
+      "cwd": "${workspaceFolder}/examples/hello-world-perf",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Todo API Example",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/examples/todo-api/index.js",
+      "cwd": "${workspaceFolder}/examples/todo-api",
+      "console": "integratedTerminal"
+    }
+  ]
+}

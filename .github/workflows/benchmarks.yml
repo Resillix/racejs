@@ -1,0 +1,95 @@
+name: Performance Benchmarks
+
+on:
+    push:
+        branches: [master, main]
+    pull_request:
+        branches: [master, main]
+
+jobs:
+    benchmark:
+        name: Run Performance Benchmarks
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "20"
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Build packages
+              run: pnpm build
+
+            - name: Install autocannon
+              run: npm install -g autocannon
+
+            - name: Run benchmarks
+              run: |
+                  # Start baseline server
+                  node packages/bench/express-baseline.js &
+                  BASELINE_PID=$!
+                  sleep 3
+
+                  # Benchmark baseline
+                  echo "Benchmarking Express 4.x baseline..."
+                  autocannon -c 100 -d 10 -j http://localhost:3000/ping > baseline-results.json
+
+                  # Stop baseline
+                  kill $BASELINE_PID
+                  sleep 2
+
+                  # Start new engine
+                  node packages/bench/new-engine.js &
+                  NEW_PID=$!
+                  sleep 3
+
+                  # Benchmark new engine
+                  echo "Benchmarking new engine..."
+                  autocannon -c 100 -d 10 -j http://localhost:3001/ping > new-results.json
+
+                  # Stop new engine
+                  kill $NEW_PID
+
+            - name: Compare results
+              run: |
+                  node -e "
+                    const baseline = require('./baseline-results.json');
+                    const newEngine = require('./new-results.json');
+
+                    const baselineRps = baseline.requests.average;
+                    const newRps = newEngine.requests.average;
+                    const improvement = ((newRps - baselineRps) / baselineRps * 100).toFixed(2);
+
+                    console.log('=== Benchmark Results ===');
+                    console.log('Baseline RPS:', baselineRps);
+                    console.log('New Engine RPS:', newRps);
+                    console.log('Improvement:', improvement + '%');
+
+                    // Fail if performance drops more than 10%
+                    if (newRps < baselineRps * 0.9) {
+                      console.error('❌ Performance regression detected!');
+                      process.exit(1);
+                    }
+
+                    console.log('✅ Performance meets requirements');
+                  "
+
+            - name: Upload benchmark results
+              uses: actions/upload-artifact@v3
+              if: always()
+              with:
+                  name: benchmark-results
+                  path: |
+                      baseline-results.json
+                      new-results.json

@@ -1,0 +1,45 @@
+{
+  "name": "@racejs/core",
+  "version": "1.0.0",
+  "description": "⚡️ High-performance core engine for RaceJS framework",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "racejs",
+    "race",
+    "performance",
+    "http",
+    "web",
+    "framework",
+    "router",
+    "fast",
+    "resellix"
+  ],
+  "author": "Dhananjay Latpate <dhananjaylatpate@resellix.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/resellix/racejs.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/resellix/racejs#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.2.0"
+  }
+}

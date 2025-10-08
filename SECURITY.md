@@ -1,6 +1,6 @@
 # Security Policies and Procedures
 
-This document outlines security procedures and general policies for the Express
+This document outlines security procedures and general policies for the RaceJS
 project.
 
   * [Reporting a Bug](#reporting-a-bug)
@@ -9,12 +9,13 @@ project.
 
 ## Reporting a Bug
 
-The Express team and community take all security bugs in Express seriously.
-Thank you for improving the security of Express. We appreciate your efforts and
+The Resellix team takes all security bugs in RaceJS seriously.
+Thank you for improving the security of RaceJS. We appreciate your efforts and
 responsible disclosure and will make every effort to acknowledge your
 contributions.
 
-Report security bugs by emailing `express-security@lists.openjsf.org`.
+Report security bugs by emailing **security@resellix.com** or through our
+[GitHub Security Advisories](https://github.com/resellix/racejs/security/advisories/new).
 
 To ensure the timely response to your report, please ensure that the entirety
 of the report is contained within the email body and not solely behind a web
@@ -46,9 +47,11 @@ involving the following steps:
   * Prepare fixes for all releases still under maintenance. These fixes will be
     released as fast as possible to npm.
 
-## The Express Threat Model
+## The RaceJS Threat Model
 
-We are currently working on a new version of the security model, the most updated version can be found [here](https://github.com/expressjs/security-wg/blob/main/docs/ThreatModel.md)
+We are developing a comprehensive security model for RaceJS. As we maintain Express compatibility, 
+we also follow security best practices from the Express.js ecosystem. Our security documentation 
+will be published at [https://github.com/resellix/racejs/security](https://github.com/resellix/racejs/security).
 
 ## Comments on this Policy
 

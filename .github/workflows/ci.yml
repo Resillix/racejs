@@ -1,13 +1,10 @@
-name: ci
+name: RaceJS CI
 
 on:
   push:
     branches:
-      - master
+      - main
       - develop
-      - '4.x'
-      - '5.x'
-      - '5.0'
     paths-ignore:
       - '*.md'
   pull_request:
