@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - **Smart Hot Reload** - Zero-downtime automatic code reloading
   - Built-in hot reload system with zero configuration
   - Native file watching via @parcel/watcher (optional)
@@ -21,11 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full TypeScript support
 
 ### Changed
+
 - Enhanced Application class with built-in hot reload support
 - Extended Router with hot-swap capabilities
 - Improved error handling and recovery
 
 ### Performance
+
 - Hot reload: < 20ms with @parcel/watcher
 - Hot reload: ~60ms with fs.watch fallback
 - Zero overhead when disabled (production)
@@ -34,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - Previous Release
 
 ### Added
+
 - Initial RaceJS release
 - High-performance routing system
 - Express.js compatibility layer
@@ -43,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Template engine support
 
 ### Features
+
 - Fast routing with optimized path matching
 - Express-compatible API
 - Lightweight core (~minimal dependencies)
@@ -86,6 +91,7 @@ const app = createApp(); // That's it! Hot reload works automatically
 ```
 
 To disable hot reload:
+
 ```javascript
 const app = createApp({ hotReload: false });
 ```
@@ -93,6 +99,7 @@ const app = createApp({ hotReload: false });
 ### New Dependencies
 
 **Optional:**
+
 - `@parcel/watcher` - Native file watcher (recommended for best performance)
 
 If not installed, RaceJS automatically falls back to Node.js `fs.watch`.
@@ -104,6 +111,7 @@ If not installed, RaceJS automatically falls back to Node.js `fs.watch`.
 ### Planned Features
 
 #### v1.1.0 (Current - Hot Reload)
+
 - [x] Smart Hot Reload system
 - [x] @parcel/watcher integration
 - [x] Zero-downtime reloading
@@ -111,6 +119,7 @@ If not installed, RaceJS automatically falls back to Node.js `fs.watch`.
 - [x] Comprehensive documentation
 
 #### v1.2.0 (Future)
+
 - [ ] WebSocket support for live reload notifications
 - [ ] Source map support for better error reporting
 - [ ] Dependency graph visualization
@@ -118,6 +127,7 @@ If not installed, RaceJS automatically falls back to Node.js `fs.watch`.
 - [ ] Hot reload for middleware changes
 
 #### v1.3.0 (Future)
+
 - [ ] Plugin system
 - [ ] Extended template engine support
 - [ ] Built-in API documentation generator
@@ -125,6 +135,7 @@ If not installed, RaceJS automatically falls back to Node.js `fs.watch`.
 - [ ] Enhanced debugging tools
 
 #### v2.0.0 (Future - Breaking Changes)
+
 - [ ] Full HTTP/2 support
 - [ ] Enhanced streaming capabilities
 - [ ] Modernized middleware system
@@ -135,6 +146,7 @@ If not installed, RaceJS automatically falls back to Node.js `fs.watch`.
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on:
+
 - Reporting bugs
 - Suggesting features
 - Submitting pull requests

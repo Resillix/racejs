@@ -17,7 +17,12 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { EventEmitter } from 'node:events';
-import { hasParcelWatcher, createWatcherBackend, type WatchBackend, type WatcherBackend } from './watcher-backend.js';
+import {
+  hasParcelWatcher,
+  createWatcherBackend,
+  type WatchBackend,
+  type WatcherBackend,
+} from './watcher-backend.js';
 
 export type Path = string;
 
@@ -143,7 +148,7 @@ export class SmartWatcher extends TypedEmitter<WatcherEvents> {
     };
 
     this.ignoreFn = makeIgnore(this.opts.ignore, this.opts.includeDotfiles);
-    
+
     // Initialize watcher backend (prefers @parcel/watcher if available)
     try {
       this.watcherBackend = createWatcherBackend(pollFallbackMs > 0);
@@ -186,7 +191,7 @@ export class SmartWatcher extends TypedEmitter<WatcherEvents> {
       } catch {}
     }
     this.backendSubscriptions.clear();
-    
+
     // Close fs.watch watchers (fallback)
     for (const [, w] of this.watchers) {
       try {
@@ -194,7 +199,7 @@ export class SmartWatcher extends TypedEmitter<WatcherEvents> {
       } catch {}
     }
     this.watchers.clear();
-    
+
     if (this.pollTimer) clearInterval(this.pollTimer);
     for (const [, t] of this.debouncers) clearTimeout(t);
     if (this.batchTimer) clearTimeout(this.batchTimer);
@@ -313,13 +318,13 @@ export class SmartWatcher extends TypedEmitter<WatcherEvents> {
 
   private watchDir(dir: Path) {
     if (this.watchers.has(dir) || this.backendSubscriptions.has(dir)) return;
-    
+
     // Try using watcher backend first (supports @parcel/watcher)
     if (this.watcherBackend && this.activeBackend === 'parcel') {
       this.watchDirWithBackend(dir);
       return;
     }
-    
+
     // Fallback to fs.watch
     try {
       const watcher = fs.watch(dir, { recursive: false }, (_eventType, filename) => {
@@ -351,42 +356,45 @@ export class SmartWatcher extends TypedEmitter<WatcherEvents> {
 
   private watchDirWithBackend(dir: Path) {
     if (!this.watcherBackend) return;
-    
-    this.watcherBackend.subscribe(
-      dir,
-      (err, events) => {
-        if (err) {
-          this.emit('error', err);
-          return;
-        }
 
-        for (const event of events) {
-          if (this.ignoreFn(event.path)) continue;
+    this.watcherBackend
+      .subscribe(
+        dir,
+        (err, events) => {
+          if (err) {
+            this.emit('error', err);
+            return;
+          }
 
-          this.debounce(event.path, async () => {
-            try {
-              if (event.type === 'delete') {
-                await this.removePath(event.path);
-              } else {
-                const st = await fsp.lstat(event.path);
-                await this.record(event.path, st, 'event');
+          for (const event of events) {
+            if (this.ignoreFn(event.path)) continue;
+
+            this.debounce(event.path, async () => {
+              try {
+                if (event.type === 'delete') {
+                  await this.removePath(event.path);
+                } else {
+                  const st = await fsp.lstat(event.path);
+                  await this.record(event.path, st, 'event');
+                }
+              } catch (e: any) {
+                if (e && (e.code === 'ENOENT' || e.code === 'ENOTDIR')) {
+                  await this.removePath(event.path);
+                } else {
+                  this.emit('error', e);
+                }
               }
-            } catch (e: any) {
-              if (e && (e.code === 'ENOENT' || e.code === 'ENOTDIR')) {
-                await this.removePath(event.path);
-              } else {
-                this.emit('error', e);
-              }
-            }
-          });
-        }
-      },
-      { ignore: this.opts.ignore.filter((p): p is string => typeof p === 'string') }
-    ).then(subscription => {
-      this.backendSubscriptions.set(dir, subscription);
-    }).catch(e => {
-      this.emit('error', e);
-    });
+            });
+          }
+        },
+        { ignore: this.opts.ignore.filter((p): p is string => typeof p === 'string') }
+      )
+      .then((subscription) => {
+        this.backendSubscriptions.set(dir, subscription);
+      })
+      .catch((e) => {
+        this.emit('error', e);
+      });
   }
 
   private debounce(p: Path, fn: () => void) {

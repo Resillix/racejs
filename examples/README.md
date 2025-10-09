@@ -1,20 +1,12 @@
 # RaceJS Examples# RaceJS Examples
 
-
-
 Complete examples demonstrating RaceJS features and capabilities.Welcome to the RaceJS examples! These examples demonstrate the features and capabilities of RaceJS, a high-performance web framework that's 2-4× faster than Express.
-
-
 
 ## 🚀 Quick Start## � Available Examples
 
-
-
 Each example is a standalone application you can run immediately:### 1. [Hello World](./01-hello-world)
 
-
-
-```bash**Difficulty:** Beginner
+`````bash**Difficulty:** Beginner
 
 cd examples/01-hello-world**Concepts:** Basic routing, JSON responses, app.compile()
 
@@ -72,7 +64,7 @@ Advanced routing and application patterns.- Logging middleware
 
 **Zero-downtime development! Edit code, save, see changes instantly!**cd 02-rest-api && node index.js
 
-```
+`````
 
 ## 🔥 Hot Reload - Must Try!
 
@@ -82,7 +74,7 @@ Example 07 demonstrates RaceJS's killer feature:
 
 **Difficulty:** Intermediate
 
-```bash**Concepts:** Global middleware, route middleware, authentication, validation
+````bash**Concepts:** Global middleware, route middleware, authentication, validation
 
 cd 07-hot-reload
 
@@ -108,7 +100,7 @@ node index.jsComprehensive middleware patterns:
 
 ## 📖 Documentationcd 03-middleware && node index.js
 
-```
+````
 
 - [Main README](../README.md)
 

@@ -57,16 +57,9 @@ export class Application {
     // Auto-detect watch directories
     const cwd = process.cwd();
     const autoDetectDirs: string[] = [];
-    
+
     // Common patterns for route directories
-    const candidates = [
-      'src/routes',
-      'src/api',
-      'routes',
-      'api',
-      'src',
-      'lib',
-    ];
+    const candidates = ['src/routes', 'src/api', 'routes', 'api', 'src', 'lib'];
 
     for (const candidate of candidates) {
       const fullPath = path.resolve(cwd, candidate);
@@ -83,15 +76,16 @@ export class Application {
     }
 
     // Build hot reload config
-    const hotReloadConfig: HotReloadOptions = typeof hotReloadOpt === 'object' 
-      ? { 
-          ...hotReloadOpt,
-          roots: hotReloadOpt.roots || autoDetectDirs,
-        }
-      : {
-          enabled: true,
-          roots: autoDetectDirs,
-        };
+    const hotReloadConfig: HotReloadOptions =
+      typeof hotReloadOpt === 'object'
+        ? {
+            ...hotReloadOpt,
+            roots: hotReloadOpt.roots || autoDetectDirs,
+          }
+        : {
+            enabled: true,
+            roots: autoDetectDirs,
+          };
 
     this.hotReload = new HotReloadManager(hotReloadConfig);
     this.hotReload.setRouter(this.router);
@@ -102,7 +96,10 @@ export class Application {
         const backend = this.hotReload!.getActiveBackend();
         const backendEmoji = backend === 'parcel' ? '🚀' : '📁';
         const backendName = backend === 'parcel' ? '@parcel/watcher' : 'fs.watch';
-        console.log(`🔥 Hot reload enabled (${backendEmoji} ${backendName}) for:`, hotReloadConfig.roots);
+        console.log(
+          `🔥 Hot reload enabled (${backendEmoji} ${backendName}) for:`,
+          hotReloadConfig.roots
+        );
       }
     });
 
@@ -292,10 +289,7 @@ export class Application {
     }
 
     // Build handler chain: global middleware + route handlers
-    const handlers: Handler[] = [
-      ...this.globalMiddleware,
-      ...(match?.handlers || []),
-    ];
+    const handlers: Handler[] = [...this.globalMiddleware, ...(match?.handlers || [])];
 
     // Handle 404 if no route matched
     if (!match) {
@@ -308,12 +302,7 @@ export class Application {
     }
 
     // Run pipeline with error handling
-    await runPipeline(
-      req as any,
-      res,
-      handlers as any,
-      this.errorHandler
-    );
+    await runPipeline(req as any, res, handlers as any, this.errorHandler);
   }
 
   /**

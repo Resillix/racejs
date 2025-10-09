@@ -1,6 +1,6 @@
 /**
  * Parcel Watcher Adapter
- * 
+ *
  * Wraps @parcel/watcher with graceful fallback to fs.watch.
  * This provides production-grade file watching with better performance
  * and cross-platform reliability.
@@ -72,7 +72,7 @@ class ParcelWatcherBackend implements WatcherBackend {
     callback: (err: Error | null, events: WatchEvent[]) => void,
     options?: { ignore?: string[] }
   ): Promise<{ unsubscribe: () => Promise<void> }> {
-    const opts: ParcelOptions | undefined = options?.ignore 
+    const opts: ParcelOptions | undefined = options?.ignore
       ? { ignore: options.ignore }
       : undefined;
 
@@ -121,16 +121,18 @@ class NativeWatcherBackend implements WatcherBackend {
       const fullPath = path.join(dir, filename);
 
       // Check if ignored
-      if (options?.ignore?.some(pattern => {
-        const regex = new RegExp(pattern.replace(/\*/g, '.*'));
-        return regex.test(fullPath);
-      })) {
+      if (
+        options?.ignore?.some((pattern) => {
+          const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+          return regex.test(fullPath);
+        })
+      ) {
         return;
       }
 
       // Map fs.watch events to our format
       let type: 'create' | 'update' | 'delete' = 'update';
-      
+
       try {
         const exists = fs.existsSync(fullPath);
         type = exists ? (eventType === 'rename' ? 'create' : 'update') : 'delete';
@@ -224,10 +226,10 @@ class PollingWatcherBackend implements WatcherBackend {
   private async scanDirectory(dir: string, snapshot: Map<string, number>): Promise<void> {
     try {
       const entries = await fs.promises.readdir(dir, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
-        
+
         if (entry.isDirectory()) {
           await this.scanDirectory(fullPath, snapshot);
         } else if (entry.isFile()) {

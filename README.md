@@ -115,6 +115,7 @@ const app = createApp();
 ```
 
 **Features:**
+
 - ✅ **Zero Config**: Auto-enabled in development mode
 - ✅ **Smart Detection**: Automatically finds your route directories
 - ✅ **Zero Downtime**: Route handlers swap atomically
@@ -125,6 +126,7 @@ const app = createApp();
 Edit your code, save, and see changes instantly—just like Next.js, Vite, or Remix!
 
 **Learn more:**
+
 - 📖 [Complete Hot Reload Guide](./docs/guides/HOT-RELOAD.md)
 - 🛠️ [Developer API](./docs/guides/hot-reload-developer-guide.md)
 - ⚡ [@parcel/watcher Setup](./docs/advanced/parcel-watcher-guide.md)
