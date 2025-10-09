@@ -8,6 +8,11 @@ export { Router, type Handler, type RouteMatch, type RouteParams } from './route
 export { Request, createRequest } from './request.js';
 export { Response, createResponse } from './response.js';
 export { runPipeline, runPipelineSync, type LifecycleHooks } from './pipeline.js';
+export { SmartWatcher, type SmartWatcherOptions, type Change, type Batch, } from './hot-reload/smart-watcher.js';
+export { HotReloadManager, type HotReloadOptions } from './hot-reload/manager.js';
+export { ModuleReloader, type ReloadResult } from './hot-reload/module-reloader.js';
+export { RouteSwapper, type RouteUpdate } from './hot-reload/route-swapper.js';
+export { hasParcelWatcher, createWatcherBackend, type WatchBackend, type WatchEvent, type WatcherBackend as WatcherBackendInterface, } from './hot-reload/watcher-backend.js';
 /**
  * Default export for convenience
  */

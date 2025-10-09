@@ -75,6 +75,16 @@ export declare class Router {
      */
     private freezeNode;
     /**
+     * Remove a route definition by method and path.
+     * This is used by hot-reload to swap handlers.
+     */
+    removeRoute(method: string, path: string): boolean;
+    /**
+     * Update handlers for an existing route atomically (if present),
+     * or add it when missing. Used by RouteSwapper.
+     */
+    updateRouteHandlers(method: string, path: string, handlers: Handler[]): void;
+    /**
      * Get all registered routes (useful for debugging)
      */
     getRoutes(): Array<{

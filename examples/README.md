@@ -1,59 +1,131 @@
-# RaceJS Examples
+# RaceJS Examples# RaceJS Examples
 
-Welcome to the RaceJS examples! These examples demonstrate the features and capabilities of RaceJS, a high-performance web framework that's 2-4× faster than Express.
 
-## � Available Examples
 
-### 1. [Hello World](./01-hello-world)
-**Difficulty:** Beginner  
-**Concepts:** Basic routing, JSON responses, app.compile()
+Complete examples demonstrating RaceJS features and capabilities.Welcome to the RaceJS examples! These examples demonstrate the features and capabilities of RaceJS, a high-performance web framework that's 2-4× faster than Express.
 
-The simplest RaceJS application. Learn the fundamentals:
-- Creating an app
+
+
+## 🚀 Quick Start## � Available Examples
+
+
+
+Each example is a standalone application you can run immediately:### 1. [Hello World](./01-hello-world)
+
+
+
+```bash**Difficulty:** Beginner
+
+cd examples/01-hello-world**Concepts:** Basic routing, JSON responses, app.compile()
+
+node index.js
+
+```The simplest RaceJS application. Learn the fundamentals:
+
+
+
+Then visit http://localhost:3000- Creating an app
+
 - Defining routes
-- Sending JSON responses
+
+## 📂 Examples Overview- Sending JSON responses
+
 - Compiling for optimal performance
 
-```bash
+### 1. Hello World - `01-hello-world/`
+
+The simplest RaceJS application. Start here!```bash
+
 cd 01-hello-world && node index.js
-```
+
+### 2. REST API - `02-rest-api/````
+
+Complete CRUD API with all HTTP methods.
 
 ### 2. [REST API](./02-rest-api)
-**Difficulty:** Beginner  
+
+### 3. Middleware - `03-middleware/`
+
+Learn middleware patterns and chains.**Difficulty:** Beginner
+
 **Concepts:** CRUD operations, route parameters, HTTP methods, body parsing
 
-Build a complete TODO REST API with:
-- GET, POST, PUT, DELETE endpoints
-- Route parameters (`:id`)
-- Request body parsing
-- Error handling
-- Logging middleware
+### 4. Performance - `04-performance/`
 
-```bash
-cd 02-rest-api && node index.js
+Optimization techniques and benchmarks.Build a complete TODO REST API with:
+
+
+
+### 5. Express Migration - `05-express-migration/`- GET, POST, PUT, DELETE endpoints
+
+Migrate from Express.js to RaceJS.- Route parameters (`:id`)
+
+- Request body parsing
+
+### 6. Advanced Patterns - `06-advanced-patterns/`- Error handling
+
+Advanced routing and application patterns.- Logging middleware
+
+
+
+### 7. Hot Reload 🔥 - `07-hot-reload/````bash
+
+**Zero-downtime development! Edit code, save, see changes instantly!**cd 02-rest-api && node index.js
+
 ```
+
+## 🔥 Hot Reload - Must Try!
 
 ### 3. [Middleware](./03-middleware)
-**Difficulty:** Intermediate  
-**Concepts:** Global middleware, route middleware, authentication, validation
 
-Comprehensive middleware patterns:
-- Global middleware (logger, timing)
-- Authentication middleware
-- Rate limiting
-- Body validation
-- Multiple middleware chaining
+Example 07 demonstrates RaceJS's killer feature:
+
+**Difficulty:** Intermediate
+
+```bash**Concepts:** Global middleware, route middleware, authentication, validation
+
+cd 07-hot-reload
+
+node index.jsComprehensive middleware patterns:
+
+
+
+# Edit any file in routes/ and save- Global middleware (logger, timing)
+
+# ♻️  Reloading: filename.js- Authentication middleware
+
+# ✅ Reloaded in 15ms- Rate limiting
+
+# No restart needed!- Body validation
+
+```- Multiple middleware chaining
+
 - Error handling middleware
 
+**Learn more:** [Hot Reload Guide](../docs/guides/HOT-RELOAD.md)
+
 ```bash
-cd 03-middleware && node index.js
+
+## 📖 Documentationcd 03-middleware && node index.js
+
 ```
 
-### 4. [Performance Optimization](./04-performance)
-**Difficulty:** Intermediate  
+- [Main README](../README.md)
+
+- [Hot Reload](../docs/guides/HOT-RELOAD.md)### 4. [Performance Optimization](./04-performance)
+
+- [Architecture](../docs/architecture.md)
+
+- [All Docs](../docs/)**Difficulty:** Intermediate
+
 **Concepts:** Route compilation, lazy parsing, streaming, compression
 
+---
+
 Maximize RaceJS performance with:
+
+**Happy coding with RaceJS!** 🚀
+
 - Route compilation (`app.compile()`)
 - Lazy parsing optimization
 - Streaming responses
@@ -66,10 +138,12 @@ cd 04-performance && node index.js
 ```
 
 ### 5. [Express Migration](./05-express-migration)
-**Difficulty:** Intermediate  
+
+**Difficulty:** Intermediate
 **Concepts:** Express compatibility, migration strategies, API comparison
 
 Learn how to migrate from Express:
+
 - **Zero-code migration** with `@racejs/compat`
 - **Native migration** to `@racejs/core`
 - Side-by-side comparison
@@ -82,10 +156,12 @@ cd 05-express-migration && npm run native
 ```
 
 ### 6. [Advanced Patterns](./06-advanced-patterns)
-**Difficulty:** Advanced  
+
+**Difficulty:** Advanced
 **Concepts:** Custom errors, async handlers, DI, validation, architecture
 
 Production-ready patterns:
+
 - Custom error classes
 - Async error handling
 - Dependency injection
@@ -101,7 +177,8 @@ cd 06-advanced-patterns && node index.js
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - pnpm (recommended) or npm
 
 ### Running Examples
@@ -181,13 +258,13 @@ app.listen(3000);
 
 ## ⚡ Performance Comparison
 
-| Framework | Requests/sec | Latency (p99) |
-|-----------|--------------|---------------|
-| Express 4.x | ~30,000 | ~15ms |
-| RaceJS (compat) | ~60,000 | ~8ms |
-| RaceJS (native) | ~80,000 | ~4ms |
+| Framework       | Requests/sec | Latency (p99) |
+| --------------- | ------------ | ------------- |
+| Express 4.x     | ~30,000      | ~15ms         |
+| RaceJS (compat) | ~60,000      | ~8ms          |
+| RaceJS (native) | ~80,000      | ~4ms          |
 
-*Benchmarked on M1 Mac, Node.js 22, simple JSON endpoint*
+_Benchmarked on M1 Mac, Node.js 22, simple JSON endpoint_
 
 ## 🔥 Key Features
 
@@ -224,8 +301,8 @@ MIT License - see [LICENSE](../LICENSE) for details.
 
 ## 👨‍💻 Author
 
-**Dhananjay Latpate**  
-Email: dhananjaylatpate@resillix.com  
+**Dhananjay Latpate**
+Email: dhananjaylatpate@resillix.com
 Organization: [Resillix](https://github.com/resillix)
 
 ## 🔗 Links

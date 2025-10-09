@@ -35,6 +35,7 @@
   "scripts": {
     "build": "pnpm --filter @racejs/core build && pnpm --filter @racejs/compat build",
     "test": "mocha test --require test/support/env --reporter spec --bail --check-leaks",
+    "test:hot-reload": "mocha 'test/hot-reload/*.test.js' --reporter spec",
     "test:ci": "npm run test",
     "lint": "eslint packages/*/src/**/*.ts",
     "format": "prettier --write \"packages/*/src/**/*.ts\"",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^8.47.0",
+    "@parcel/watcher": "^2.5.1",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.4.0",

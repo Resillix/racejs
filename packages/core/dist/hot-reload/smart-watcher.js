@@ -1,0 +1,543 @@
+/*
+ * smart-watcher.ts — A robust, dependency-aware file watching system for Node.js/TypeScript
+ *
+ * Features
+ *  - Cross-platform watching via @parcel/watcher (preferred) or fs.watch with intelligent fallbacks to polling
+ *  - Recursive initial scan with ignore filters (glob-like with * and **)
+ *  - Event debouncing + batching to avoid change storms
+ *  - Optional content hashing (fast SHA-1) vs mtime+size checks
+ *  - Dependency graph tracking (provide a dependency resolver) with reverse edges
+ *  - Affected-node expansion + topological ordering for safe rebuild/reload
+ *  - Priority ordering: deletions → additions → modifications
+ *  - Stable, typed event API
+ */
+import fs from 'node:fs';
+import fsp from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { EventEmitter } from 'node:events';
+import { hasParcelWatcher, createWatcherBackend } from './watcher-backend.js';
+class TypedEmitter extends EventEmitter {
+    on(event, listener) {
+        return super.on(event, listener);
+    }
+    emit(event, ...args) {
+        return super.emit(event, ...args);
+    }
+}
+function makeIgnore(pats = [], includeDotfiles = false) {
+    const regs = pats.map((p) => (typeof p === 'string' ? globToRegExp(p, includeDotfiles) : p));
+    return (p) => regs.some((r) => r.test(normalizePath(p)));
+}
+function globToRegExp(glob, includeDotfiles) {
+    const escaped = glob.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\\\\/g, '/');
+    const re = escaped.replace(/\*\*/g, '(?:(?:[^/]+/)*?)').replace(/\*/g, '[^/]*');
+    const prefix = includeDotfiles ? '' : '(?!\\.)';
+    return new RegExp('^' + re.replace(/\^/, prefix) + '$');
+}
+function normalizePath(p) {
+    return p.split(path.sep).join('/');
+}
+export class SmartWatcher extends TypedEmitter {
+    opts;
+    ignoreFn;
+    files = new Map();
+    dirs = new Set();
+    reverseDeps = new Map();
+    watchers = new Map();
+    watcherBackend = null;
+    backendSubscriptions = new Map();
+    debouncers = new Map();
+    eventQueue = [];
+    batchTimer = null;
+    ready = false;
+    // note: reserved for future shutdown coordination
+    // private closing = false;
+    pollTimer = null;
+    activeBackend = 'native';
+    constructor(options) {
+        super();
+        const { roots, ignore = ['**/.git/**', '**/node_modules/**'], hashMode = 'mtime', debounceMs = 75, batchMs = 120, pollFallbackMs = 0, resolveDependencies, followSymlinks = false, includeDotfiles = false, } = options;
+        this.opts = {
+            roots,
+            ignore: Array.isArray(ignore) ? ignore : [ignore],
+            hashMode,
+            debounceMs,
+            batchMs,
+            pollFallbackMs,
+            resolveDependencies,
+            followSymlinks,
+            includeDotfiles,
+        };
+        this.ignoreFn = makeIgnore(this.opts.ignore, this.opts.includeDotfiles);
+        // Initialize watcher backend (prefers @parcel/watcher if available)
+        try {
+            this.watcherBackend = createWatcherBackend(pollFallbackMs > 0);
+            this.activeBackend = this.watcherBackend.getBackend();
+        }
+        catch (e) {
+            // Fallback to fs.watch if backend creation fails
+            this.watcherBackend = null;
+            this.activeBackend = 'native';
+        }
+    }
+    async start() {
+        for (const r of this.opts.roots) {
+            const abs = path.resolve(r);
+            await this.scanDir(abs);
+        }
+        for (const d of this.dirs) {
+            this.watchDir(d);
+        }
+        if (this.opts.pollFallbackMs > 0) {
+            this.pollTimer = setInterval(() => this.pollSweep().catch((e) => this.emit('error', e)), this.opts.pollFallbackMs);
+            // Hint: Node timers have unref in runtime, but types may vary across versions
+            this.pollTimer.unref?.();
+        }
+        this.ready = true;
+        this.emit('ready');
+    }
+    async close() {
+        // Close backend subscriptions
+        for (const [, sub] of this.backendSubscriptions) {
+            try {
+                await sub.unsubscribe();
+            }
+            catch { }
+        }
+        this.backendSubscriptions.clear();
+        // Close fs.watch watchers (fallback)
+        for (const [, w] of this.watchers) {
+            try {
+                w.close();
+            }
+            catch { }
+        }
+        this.watchers.clear();
+        if (this.pollTimer)
+            clearInterval(this.pollTimer);
+        for (const [, t] of this.debouncers)
+            clearTimeout(t);
+        if (this.batchTimer)
+            clearTimeout(this.batchTimer);
+    }
+    /**
+     * Get information about the watcher backend being used
+     */
+    static getBackendInfo() {
+        return {
+            backend: hasParcelWatcher() ? 'parcel' : 'native',
+            hasParcel: hasParcelWatcher(),
+        };
+    }
+    /**
+     * Get the active backend for this instance
+     */
+    getActiveBackend() {
+        return this.activeBackend;
+    }
+    async scanDir(dir) {
+        const absDir = path.resolve(dir);
+        if (this.ignoreFn(absDir))
+            return;
+        try {
+            const entries = await fsp.readdir(absDir, { withFileTypes: true });
+            this.dirs.add(absDir);
+            for (const ent of entries) {
+                const full = path.join(absDir, ent.name);
+                if (this.ignoreFn(full))
+                    continue;
+                try {
+                    const st = await fsp.lstat(full);
+                    if (st.isSymbolicLink() && !this.opts.followSymlinks)
+                        continue;
+                    if (st.isDirectory()) {
+                        await this.scanDir(full);
+                    }
+                    else {
+                        await this.record(full, st, 'scan');
+                    }
+                }
+                catch (e) {
+                    this.emit('error', e);
+                }
+            }
+        }
+        catch (e) {
+            this.emit('error', e);
+        }
+    }
+    async record(p, st, _phase) {
+        const kind = st.isDirectory()
+            ? 'dir'
+            : st.isFile()
+                ? 'file'
+                : st.isSymbolicLink()
+                    ? 'symlink'
+                    : 'other';
+        const meta = {
+            kind,
+            size: st.size,
+            mtimeMs: st.mtimeMs,
+        };
+        if (kind === 'file' && this.opts.hashMode === 'content') {
+            try {
+                const h = await this.hashOf(p);
+                meta.hash = h;
+            }
+            catch {
+                // keep hash undefined; meta type allows optional
+            }
+        }
+        const key = path.resolve(p);
+        const old = this.files.get(key);
+        if (!old) {
+            this.files.set(key, meta);
+            if (this.ready && kind !== 'dir')
+                this.queue({ type: 'added', file: key });
+        }
+        else {
+            const changed = this.metaChanged(old, meta);
+            if (changed) {
+                this.files.set(key, meta);
+                if (this.ready && kind !== 'dir')
+                    this.queue({ type: 'modified', file: key });
+            }
+        }
+    }
+    metaChanged(a, b) {
+        if (a.kind !== b.kind)
+            return true;
+        if (this.opts.hashMode === 'content')
+            return a.hash !== b.hash || a.size !== b.size;
+        return a.mtimeMs !== b.mtimeMs || a.size !== b.size;
+    }
+    async removePath(p) {
+        const key = path.resolve(p);
+        const had = this.files.get(key);
+        if (had) {
+            this.files.delete(key);
+            if (this.ready && had.kind !== 'dir')
+                this.queue({ type: 'deleted', file: key });
+        }
+        if (this.dirs.has(key))
+            this.dirs.delete(key);
+    }
+    async hashOf(file) {
+        return new Promise((resolve, reject) => {
+            const h = crypto.createHash('sha1');
+            const s = fs.createReadStream(file);
+            s.on('error', reject);
+            s.on('data', (d) => h.update(d));
+            s.on('end', () => resolve(h.digest('hex')));
+        });
+    }
+    watchDir(dir) {
+        if (this.watchers.has(dir) || this.backendSubscriptions.has(dir))
+            return;
+        // Try using watcher backend first (supports @parcel/watcher)
+        if (this.watcherBackend && this.activeBackend === 'parcel') {
+            this.watchDirWithBackend(dir);
+            return;
+        }
+        // Fallback to fs.watch
+        try {
+            const watcher = fs.watch(dir, { recursive: false }, (_eventType, filename) => {
+                if (!filename)
+                    return;
+                const full = path.join(dir, filename.toString());
+                if (this.ignoreFn(full))
+                    return;
+                this.debounce(full, async () => {
+                    try {
+                        const st = await fsp.lstat(full);
+                        await this.record(full, st, 'event');
+                    }
+                    catch (e) {
+                        // If file is gone
+                        if (e && (e.code === 'ENOENT' || e.code === 'ENOTDIR')) {
+                            await this.removePath(full);
+                        }
+                        else {
+                            this.emit('error', e);
+                        }
+                    }
+                });
+            });
+            watcher.on('error', (e) => this.emit('error', e));
+            this.watchers.set(dir, watcher);
+        }
+        catch (e) {
+            this.emit('error', e);
+        }
+    }
+    watchDirWithBackend(dir) {
+        if (!this.watcherBackend)
+            return;
+        this.watcherBackend.subscribe(dir, (err, events) => {
+            if (err) {
+                this.emit('error', err);
+                return;
+            }
+            for (const event of events) {
+                if (this.ignoreFn(event.path))
+                    continue;
+                this.debounce(event.path, async () => {
+                    try {
+                        if (event.type === 'delete') {
+                            await this.removePath(event.path);
+                        }
+                        else {
+                            const st = await fsp.lstat(event.path);
+                            await this.record(event.path, st, 'event');
+                        }
+                    }
+                    catch (e) {
+                        if (e && (e.code === 'ENOENT' || e.code === 'ENOTDIR')) {
+                            await this.removePath(event.path);
+                        }
+                        else {
+                            this.emit('error', e);
+                        }
+                    }
+                });
+            }
+        }, { ignore: this.opts.ignore.filter((p) => typeof p === 'string') }).then(subscription => {
+            this.backendSubscriptions.set(dir, subscription);
+        }).catch(e => {
+            this.emit('error', e);
+        });
+    }
+    debounce(p, fn) {
+        const key = path.resolve(p);
+        const ms = this.opts.debounceMs;
+        const t = this.debouncers.get(key);
+        if (t)
+            clearTimeout(t);
+        this.debouncers.set(key, setTimeout(() => {
+            this.debouncers.delete(key);
+            fn();
+        }, ms));
+    }
+    async pollSweep() {
+        const candidates = Array.from(this.dirs);
+        for (const d of candidates) {
+            if (this.ignoreFn(d))
+                continue;
+            try {
+                const entries = await fsp.readdir(d, { withFileTypes: true });
+                for (const ent of entries) {
+                    const full = path.join(d, ent.name);
+                    if (this.ignoreFn(full))
+                        continue;
+                    try {
+                        const st = await fsp.lstat(full);
+                        await this.record(full, st, 'poll');
+                    }
+                    catch (e) {
+                        if (e && (e.code === 'ENOENT' || e.code === 'ENOTDIR')) {
+                            await this.removePath(full);
+                        }
+                    }
+                }
+            }
+            catch {
+                // ignore missing dir
+            }
+        }
+    }
+    queue(c) {
+        this.eventQueue.push(c);
+        this.emit('change', c);
+        if (!this.batchTimer) {
+            this.batchTimer = setTimeout(() => this.flushBatch(), this.opts.batchMs);
+        }
+    }
+    async flushBatch() {
+        const items = this.eventQueue.splice(0, this.eventQueue.length);
+        if (this.batchTimer)
+            clearTimeout(this.batchTimer);
+        this.batchTimer = null;
+        if (items.length === 0)
+            return;
+        const latest = new Map();
+        for (const it of items) {
+            const prev = latest.get(it.file);
+            if (!prev)
+                latest.set(it.file, it.type);
+            else {
+                const next = collapse(prev, it.type);
+                if (next === null)
+                    latest.delete(it.file);
+                else
+                    latest.set(it.file, next);
+            }
+        }
+        const condensed = Array.from(latest, ([file, type]) => ({ file, type }));
+        const affected = new Set(condensed.map((c) => c.file));
+        if (this.opts.resolveDependencies) {
+            await this.ensureReverseGraphFor(Array.from(affected));
+            const extra = this.expandDependents(Array.from(affected));
+            for (const e of extra)
+                affected.add(e);
+        }
+        const byType = { deleted: [], added: [], modified: [] };
+        for (const c of condensed)
+            byType[c.type].push(c);
+        const ordered = [];
+        for (const t of ['deleted', 'added', 'modified']) {
+            const list = byType[t];
+            const sorted = this.topoOrder(list.map((c) => c.file));
+            for (const f of sorted)
+                ordered.push({ type: t, file: f });
+        }
+        const batch = {
+            changes: ordered,
+            affected,
+            summary() {
+                const counts = { added: 0, modified: 0, deleted: 0 };
+                for (const c of ordered)
+                    counts[c.type]++;
+                return `Δ files: +${counts.added} ~${counts.modified} -${counts.deleted}`;
+            },
+        };
+        this.emit('batch', batch);
+    }
+    async ensureReverseGraphFor(files) {
+        if (!this.opts.resolveDependencies)
+            return;
+        const resolveDeps = this.opts.resolveDependencies;
+        for (const f of files) {
+            try {
+                const deps = await resolveDeps(f);
+                const key = path.resolve(f);
+                for (const d of deps) {
+                    const dep = path.resolve(d);
+                    if (!this.reverseDeps.has(dep))
+                        this.reverseDeps.set(dep, new Set());
+                    this.reverseDeps.get(dep).add(key);
+                }
+            }
+            catch (e) {
+                this.emit('error', e);
+            }
+        }
+    }
+    expandDependents(seeds) {
+        const out = new Set();
+        const stack = seeds.map((s) => path.resolve(s));
+        while (stack.length) {
+            const cur = stack.pop();
+            if (out.has(cur))
+                continue;
+            out.add(cur);
+            const parents = this.reverseDeps.get(cur);
+            if (parents)
+                for (const p of parents)
+                    stack.push(p);
+        }
+        return out;
+    }
+    topoOrder(files) {
+        if (!this.opts.resolveDependencies)
+            return Array.from(new Set(files));
+        const affected = new Set(files.map((f) => path.resolve(f)));
+        const incoming = new Map();
+        const outgoing = new Map();
+        const getParents = (f) => this.reverseDeps.get(path.resolve(f)) || new Set();
+        for (const f of affected) {
+            const parents = getParents(f);
+            for (const p of parents) {
+                if (!affected.has(p))
+                    continue;
+                if (!outgoing.has(p))
+                    outgoing.set(p, new Set());
+                outgoing.get(p).add(f);
+                incoming.set(f, (incoming.get(f) || 0) + 1);
+            }
+            if (!incoming.has(f))
+                incoming.set(f, 0);
+        }
+        const q = [];
+        for (const [f, deg] of incoming)
+            if (deg === 0)
+                q.push(f);
+        const out = [];
+        while (q.length) {
+            const n = q.shift();
+            out.push(n);
+            for (const m of outgoing.get(n) || []) {
+                const d = (incoming.get(m) || 0) - 1;
+                incoming.set(m, d);
+                if (d === 0)
+                    q.push(m);
+            }
+        }
+        if (out.length !== affected.size) {
+            for (const f of affected)
+                if (!out.includes(f))
+                    out.push(f);
+        }
+        const requested = new Set(files.map((f) => path.resolve(f)));
+        return out.filter((f) => requested.has(f));
+    }
+}
+function collapse(prev, next) {
+    if (prev === next)
+        return prev;
+    if (prev === 'added' && next === 'deleted')
+        return null;
+    if (prev === 'deleted' && next === 'added')
+        return 'modified';
+    if (prev === 'added' && next === 'modified')
+        return 'added';
+    if (prev === 'modified' && next === 'deleted')
+        return 'deleted';
+    if (prev === 'deleted' && next === 'modified')
+        return 'added';
+    return next;
+}
+export async function parseImports(file) {
+    try {
+        const text = await fsp.readFile(file, 'utf8');
+        const dir = path.dirname(file);
+        const re = /(?:import|require)\s*(?:[^"']*?)["']([^'"\n]+)["']/g;
+        const out = [];
+        let m;
+        while ((m = re.exec(text))) {
+            const spec = m?.[1];
+            if (typeof spec === 'string' && (spec.startsWith('.') || spec.startsWith('..'))) {
+                const resolved = tryResolveModule(dir, spec);
+                if (resolved)
+                    out.push(resolved);
+            }
+        }
+        return out;
+    }
+    catch {
+        return [];
+    }
+}
+function tryResolveModule(fromDir, spec) {
+    const tryPaths = [
+        path.resolve(fromDir, spec),
+        path.resolve(fromDir, spec + '.ts'),
+        path.resolve(fromDir, spec + '.tsx'),
+        path.resolve(fromDir, spec + '.js'),
+        path.resolve(fromDir, spec + '.jsx'),
+        path.resolve(fromDir, spec, 'index.ts'),
+        path.resolve(fromDir, spec, 'index.tsx'),
+        path.resolve(fromDir, spec, 'index.js'),
+        path.resolve(fromDir, spec, 'index.jsx'),
+    ];
+    for (const p of tryPaths) {
+        try {
+            const s = fs.statSync(p);
+            if (s.isFile())
+                return p;
+        }
+        catch { }
+    }
+    return null;
+}
+//# sourceMappingURL=smart-watcher.js.map

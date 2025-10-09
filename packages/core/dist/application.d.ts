@@ -7,6 +7,7 @@ import { type Server, type IncomingMessage, type ServerResponse } from 'node:htt
 import { type Handler, type RouteMatch } from './router.js';
 import { Request } from './request.js';
 import { Response } from './response.js';
+import { type HotReloadOptions } from './hot-reload/manager.js';
 export interface AppOptions {
     /** Enable HTTP/2 support */
     http2?: boolean;
@@ -14,6 +15,8 @@ export interface AppOptions {
     asyncContext?: boolean | 'auto';
     /** Compatibility mode for Express 4.x */
     compat?: boolean;
+    /** Hot reload configuration (auto-enabled in development) */
+    hotReload?: boolean | HotReloadOptions;
 }
 export declare class Application {
     private router;
@@ -22,7 +25,14 @@ export declare class Application {
     private errorHandler?;
     private settings;
     private compiled;
-    constructor(_options?: AppOptions);
+    private hotReload?;
+    private options;
+    constructor(options?: AppOptions);
+    /**
+     * Setup built-in hot reload for development
+     * Auto-detects common project structures and enables zero-config hot reloading
+     */
+    private setupHotReload;
     /**
      * Register global middleware (runs before routes)
      */

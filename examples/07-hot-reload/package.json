@@ -1,0 +1,11 @@
+{
+  "name": "racejs-builtin-hot-reload-example",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Example demonstrating RaceJS's built-in hot reload feature",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "NODE_ENV=development node index.js"
+  }
+}

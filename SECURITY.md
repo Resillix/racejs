@@ -3,9 +3,9 @@
 This document outlines security procedures and general policies for the RaceJS
 project.
 
-  * [Reporting a Bug](#reporting-a-bug)
-  * [Disclosure Policy](#disclosure-policy)
-  * [Comments on this Policy](#comments-on-this-policy)
+- [Reporting a Bug](#reporting-a-bug)
+- [Disclosure Policy](#disclosure-policy)
+- [Comments on this Policy](#comments-on-this-policy)
 
 ## Reporting a Bug
 
@@ -42,15 +42,15 @@ When the security team receives a security bug report, they will assign it to a
 primary handler. This person will coordinate the fix and release process,
 involving the following steps:
 
-  * Confirm the problem and determine the affected versions.
-  * Audit code to find any potential similar problems.
-  * Prepare fixes for all releases still under maintenance. These fixes will be
-    released as fast as possible to npm.
+- Confirm the problem and determine the affected versions.
+- Audit code to find any potential similar problems.
+- Prepare fixes for all releases still under maintenance. These fixes will be
+  released as fast as possible to npm.
 
 ## The RaceJS Threat Model
 
-We are developing a comprehensive security model for RaceJS. As we maintain Express compatibility, 
-we also follow security best practices from the Express.js ecosystem. Our security documentation 
+We are developing a comprehensive security model for RaceJS. As we maintain Express compatibility,
+we also follow security best practices from the Express.js ecosystem. Our security documentation
 will be published at [https://github.com/resillix/racejs/security](https://github.com/resillix/racejs/security).
 
 ## Comments on this Policy

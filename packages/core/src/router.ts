@@ -182,6 +182,8 @@ export class Router {
    * Enables V8 inline caching and hidden class optimization
    */
   private freezeNode(node: RouterNode): void {
+    // If this node is already frozen from a prior compile, skip.
+    if (Object.isFrozen(node)) return;
     node.compiled = true;
 
     if (node.s) {
@@ -200,6 +202,68 @@ export class Router {
 
     // Freeze to prevent shape changes
     Object.freeze(node);
+  }
+
+  /**
+   * Remove a route definition by method and path.
+   * This is used by hot-reload to swap handlers.
+   */
+  removeRoute(method: string, path: string): boolean {
+    if (this.isCompiled) {
+      // allow modification by toggling compiled flag; we'll recompile after updates
+      this.isCompiled = false;
+    }
+
+    const segments = this.parsePath(path);
+    const stack: RouterNode[] = [this.root];
+    let node: RouterNode | null = this.root;
+
+    for (const seg of segments) {
+      if (!node) return false;
+      if (seg.type === 'static') {
+        if (!node.s) return false;
+        node = node.s.get(seg.value) || null;
+      } else if (seg.type === 'param') {
+        node = node.p?.node || null;
+      } else {
+        node = node.w || null;
+      }
+      if (node) stack.push(node);
+    }
+
+    if (!node?.m) return false;
+    const had = node.m.delete(method);
+    return had;
+  }
+
+  /**
+   * Update handlers for an existing route atomically (if present),
+   * or add it when missing. Used by RouteSwapper.
+   */
+  updateRouteHandlers(method: string, path: string, handlers: Handler[]): void {
+    if (this.isCompiled) this.isCompiled = false;
+
+    const segments = this.parsePath(path);
+    let node = this.root;
+    for (const seg of segments) {
+      if (seg.type === 'static') {
+        if (!node.s) node.s = new Map();
+        let child = node.s.get(seg.value);
+        if (!child) {
+          child = {};
+          node.s.set(seg.value, child);
+        }
+        node = child;
+      } else if (seg.type === 'param') {
+        if (!node.p) node.p = { name: seg.value, node: {} };
+        node = node.p.node;
+      } else {
+        if (!node.w) node.w = {};
+        node = node.w;
+      }
+    }
+    if (!node.m) node.m = new Map();
+    node.m.set(method, handlers);
   }
 
   /**

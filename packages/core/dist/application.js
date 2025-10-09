@@ -8,6 +8,9 @@ import { Router } from './router.js';
 import { runPipeline } from './pipeline.js';
 import { createRequest } from './request.js';
 import { Response } from './response.js';
+import { HotReloadManager } from './hot-reload/manager.js';
+import path from 'node:path';
+import { existsSync } from 'node:fs';
 export class Application {
     router;
     server;
@@ -15,9 +18,84 @@ export class Application {
     errorHandler;
     settings = new Map();
     compiled = false;
-    constructor(_options = {}) {
-        // Options reserved for future use (HTTP/2, async context, etc.)
+    hotReload;
+    options;
+    constructor(options = {}) {
+        this.options = options;
         this.router = new Router();
+        this.setupHotReload();
+    }
+    /**
+     * Setup built-in hot reload for development
+     * Auto-detects common project structures and enables zero-config hot reloading
+     */
+    setupHotReload() {
+        const hotReloadOpt = this.options.hotReload;
+        // Disabled explicitly
+        if (hotReloadOpt === false)
+            return;
+        // Auto-enable in development
+        const isDev = process.env.NODE_ENV !== 'production';
+        if (!isDev && hotReloadOpt !== true && typeof hotReloadOpt !== 'object')
+            return;
+        // Auto-detect watch directories
+        const cwd = process.cwd();
+        const autoDetectDirs = [];
+        // Common patterns for route directories
+        const candidates = [
+            'src/routes',
+            'src/api',
+            'routes',
+            'api',
+            'src',
+            'lib',
+        ];
+        for (const candidate of candidates) {
+            const fullPath = path.resolve(cwd, candidate);
+            if (existsSync(fullPath)) {
+                autoDetectDirs.push(fullPath);
+                break; // Use first match for minimal scope
+            }
+        }
+        // Fallback to src or cwd if nothing found
+        if (autoDetectDirs.length === 0) {
+            const srcPath = path.resolve(cwd, 'src');
+            autoDetectDirs.push(existsSync(srcPath) ? srcPath : cwd);
+        }
+        // Build hot reload config
+        const hotReloadConfig = typeof hotReloadOpt === 'object'
+            ? {
+                ...hotReloadOpt,
+                roots: hotReloadOpt.roots || autoDetectDirs,
+            }
+            : {
+                enabled: true,
+                roots: autoDetectDirs,
+            };
+        this.hotReload = new HotReloadManager(hotReloadConfig);
+        this.hotReload.setRouter(this.router);
+        // Wire up events
+        this.hotReload.on('started', () => {
+            if (isDev) {
+                const backend = this.hotReload.getActiveBackend();
+                const backendEmoji = backend === 'parcel' ? '🚀' : '📁';
+                const backendName = backend === 'parcel' ? '@parcel/watcher' : 'fs.watch';
+                console.log(`🔥 Hot reload enabled (${backendEmoji} ${backendName}) for:`, hotReloadConfig.roots);
+            }
+        });
+        this.hotReload.on('reloading', ({ files }) => {
+            if (isDev) {
+                console.log('♻️  Reloading:', files.map((f) => path.relative(cwd, f)).join(', '));
+            }
+        });
+        this.hotReload.on('reloaded', ({ duration }) => {
+            if (isDev) {
+                console.log(`✅ Reloaded in ${duration}ms`);
+            }
+        });
+        this.hotReload.on('reload-error', ({ errors }) => {
+            console.error('❌ Hot reload error:', errors[0]?.message || 'Unknown error');
+        });
     }
     use(pathOrHandler, handler) {
         if (typeof pathOrHandler === 'function') {
@@ -92,6 +170,10 @@ export class Application {
         if (!this.compiled) {
             this.compile();
         }
+        // Start hot reload before server starts
+        if (this.hotReload) {
+            this.hotReload.start();
+        }
         const host = typeof hostOrCallback === 'string' ? hostOrCallback : undefined;
         const cb = typeof hostOrCallback === 'function' ? hostOrCallback : callback;
         this.server = createServer((req, res) => {
@@ -109,6 +191,10 @@ export class Application {
      * Close server
      */
     close(callback) {
+        // Stop hot reload
+        if (this.hotReload) {
+            this.hotReload.stop();
+        }
         if (this.server) {
             this.server.close(callback);
         }

@@ -10,7 +10,8 @@
 ## 🚀 Why RaceJS?
 
 - **⚡️ Blazing Fast**: 2-3x faster than Express.js with optimized routing and middleware
-- **🔄 Drop-in Replacement**: 90%+ Express 4.x API compatibility
+- **� Built-in Hot Reload**: Zero-config hot reload in development—just like Next.js!
+- **�🔄 Drop-in Replacement**: 90%+ Express 4.x API compatibility
 - **🎯 Zero-Cost Middleware**: Pre-bound `next()` functions eliminate closure allocations
 - **🌲 Radix Trie Router**: O(k) lookup complexity for lightning-fast route matching
 - **💪 TypeScript First**: Built with TypeScript for excellent developer experience
@@ -20,13 +21,13 @@
 
 RaceJS significantly outperforms Express.js:
 
-| Route Type | RaceJS (req/s) | Express 4.x | Improvement |
-|------------|----------------|-------------|-------------|
-| Static (`/ping`) | ~11,000 | ~5,500 | **2x faster** |
-| Parameterized (`/user/:id`) | ~19,000 | ~4,800 | **4x faster** |
-| POST requests | ~19,500 | ~4,700 | **4x faster** |
+| Route Type                  | RaceJS (req/s) | Express 4.x | Improvement   |
+| --------------------------- | -------------- | ----------- | ------------- |
+| Static (`/ping`)            | ~11,000        | ~5,500      | **2x faster** |
+| Parameterized (`/user/:id`) | ~19,000        | ~4,800      | **4x faster** |
+| POST requests               | ~19,500        | ~4,700      | **4x faster** |
 
-*Benchmarks run on Node.js v20 with sequential HTTP requests*
+_Benchmarks run on Node.js v20 with sequential HTTP requests_
 
 ## 📦 Installation
 
@@ -59,9 +60,10 @@ app.get('/user/:id', (req, res) => {
 // Compile routes for optimal performance
 app.compile();
 
-// Start server
+// Start server (hot reload automatically enabled in development!)
 app.listen(3000, () => {
   console.log('🏁 RaceJS server running on http://localhost:3000');
+  console.log('🔥 Hot reload active - edit your code and see instant updates!');
 });
 ```
 
@@ -86,19 +88,46 @@ app.listen(3000);
 RaceJS is built on three core optimizations:
 
 ### 1. **Radix Trie Router**
+
 - O(k) lookup complexity (k = path length)
 - Efficient parameter extraction
 - Static, parameterized, and wildcard route support
 
 ### 2. **Zero-Cost Middleware Pipeline**
+
 - Pre-bound `next()` functions
 - Minimal allocations in hot path
 - Async/await support with zero overhead
 
 ### 3. **Lazy Request Parsing**
+
 - Query strings parsed on-demand
 - Cached parsed results
 - Minimal memory footprint
+
+### 4. **Built-in Hot Reload** 🔥
+
+RaceJS includes professional hot reload out of the box—no configuration needed!
+
+```javascript
+const app = createApp();
+// That's it! Hot reload works automatically in development
+```
+
+**Features:**
+- ✅ **Zero Config**: Auto-enabled in development mode
+- ✅ **Smart Detection**: Automatically finds your route directories
+- ✅ **Zero Downtime**: Route handlers swap atomically
+- ✅ **Production Safe**: Automatically disabled in production
+- ✅ **Instant Feedback**: See changes without restarting server
+- 🚀 **@parcel/watcher Support**: Optional native file watcher for better performance
+
+Edit your code, save, and see changes instantly—just like Next.js, Vite, or Remix!
+
+**Learn more:**
+- 📖 [Complete Hot Reload Guide](./docs/guides/HOT-RELOAD.md)
+- 🛠️ [Developer API](./docs/guides/hot-reload-developer-guide.md)
+- ⚡ [@parcel/watcher Setup](./docs/advanced/parcel-watcher-guide.md)
 
 ## 📚 Documentation
 
@@ -107,6 +136,7 @@ RaceJS is built on three core optimizations:
 - [Migration from Express](./docs/migration.md)
 - [Performance Tuning](./docs/performance.md)
 - [Architecture Deep Dive](./docs/architecture.md)
+- [Hot Reload — Developer Guide](./docs/hot-reload-developer-guide.md)
 
 ## 🔧 API Overview
 
@@ -116,49 +146,49 @@ RaceJS is built on three core optimizations:
 const app = createApp(options);
 
 // HTTP methods
-app.get(path, ...handlers)
-app.post(path, ...handlers)
-app.put(path, ...handlers)
-app.delete(path, ...handlers)
-app.patch(path, ...handlers)
-app.all(path, ...handlers)
+app.get(path, ...handlers);
+app.post(path, ...handlers);
+app.put(path, ...handlers);
+app.delete(path, ...handlers);
+app.patch(path, ...handlers);
+app.all(path, ...handlers);
 
 // Middleware
-app.use(...handlers)
+app.use(...handlers);
 
 // Settings
-app.set(name, value)
-app.getSetting(name)
+app.set(name, value);
+app.getSetting(name);
 
 // Compile routes (recommended before listen)
-app.compile()
+app.compile();
 
 // Start server
-app.listen(port, callback)
+app.listen(port, callback);
 ```
 
 ### Request Object
 
 ```javascript
-req.method      // HTTP method
-req.url         // Request URL
-req.params      // Route parameters
-req.query       // Query string (lazy-parsed)
-req.path        // Request path
-req.hostname    // Hostname
-req.ip          // Client IP
+req.method; // HTTP method
+req.url; // Request URL
+req.params; // Route parameters
+req.query; // Query string (lazy-parsed)
+req.path; // Request path
+req.hostname; // Hostname
+req.ip; // Client IP
 ```
 
 ### Response Object
 
 ```javascript
-res.json(data)           // Send JSON
-res.send(data)           // Send response
-res.status(code)         // Set status code
-res.set(name, value)     // Set header
-res.cookie(name, value)  // Set cookie
-res.redirect(url)        // Redirect
-res.type(type)           // Set Content-Type
+res.json(data); // Send JSON
+res.send(data); // Send response
+res.status(code); // Set status code
+res.set(name, value); // Set header
+res.cookie(name, value); // Set cookie
+res.redirect(url); // Redirect
+res.type(type); // Set Content-Type
 ```
 
 ## 🔄 Migrating from Express
@@ -206,6 +236,7 @@ MIT © [Dhananjay Latpate](mailto:dhananjaylatpate@resillix.com)
 ## 👨‍💻 Author
 
 **Dhananjay Latpate**
+
 - 📧 Email: dhananjaylatpate@resillix.com
 - 🏢 Company: [Resillix](https://resillix.com)
 - 💼 GitHub: [@resillix](https://github.com/resillix)

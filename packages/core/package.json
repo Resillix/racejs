@@ -38,6 +38,9 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "optionalDependencies": {
+    "@parcel/watcher": "^2.4.0"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "typescript": "^5.2.0"
