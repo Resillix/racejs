@@ -49,6 +49,7 @@ export interface RouteMatch {
 export class Router {
   private root: RouterNode = {};
   private isCompiled = false;
+  private hotReloadMode = false;
 
   /**
    * Add a route to the router
@@ -168,18 +169,33 @@ export class Router {
   }
 
   /**
+   * Enable hot reload mode (disables freezing for route updates)
+   */
+  enableHotReload(): void {
+    this.hotReloadMode = true;
+  }
+
+  /**
    * Freeze router structure to enable V8 optimizations
    * Call after all routes are registered
+   *
+   * Note: Skipped when hot reload mode is enabled
    */
   compile(): void {
     if (this.isCompiled) return;
     this.isCompiled = true;
-    this.freezeNode(this.root);
+
+    // Don't freeze in hot reload mode (routes need to be mutable)
+    if (!this.hotReloadMode) {
+      this.freezeNode(this.root);
+    }
   }
 
   /**
    * Recursively freeze node structures to create monomorphic shapes
    * Enables V8 inline caching and hidden class optimization
+   *
+   * Note: We don't freeze the handler map (node.m) to allow hot reload
    */
   private freezeNode(node: RouterNode): void {
     // If this node is already frozen from a prior compile, skip.
@@ -190,18 +206,26 @@ export class Router {
       for (const child of node.s.values()) {
         this.freezeNode(child);
       }
+      // Freeze the Map itself, but not its contents
+      Object.freeze(node.s);
     }
 
     if (node.p) {
       this.freezeNode(node.p.node);
+      // Freeze the param descriptor but not the child node
+      Object.freeze(node.p);
     }
 
     if (node.w) {
       this.freezeNode(node.w);
     }
 
-    // Freeze to prevent shape changes
+    // Don't freeze node.m (handler map) - allow hot reload to swap handlers
+    // Freeze the node structure but keep handlers mutable
+    const handlers = node.m;
+    delete node.m;
     Object.freeze(node);
+    if (handlers) node.m = handlers; // Restore after freeze
   }
 
   /**
@@ -239,29 +263,52 @@ export class Router {
   /**
    * Update handlers for an existing route atomically (if present),
    * or add it when missing. Used by RouteSwapper.
+   *
+   * Note: This works even after compile() because we don't freeze handler maps
    */
   updateRouteHandlers(method: string, path: string, handlers: Handler[]): void {
-    if (this.isCompiled) this.isCompiled = false;
-
     const segments = this.parsePath(path);
     let node = this.root;
+
+    // Navigate to the target node
     for (const seg of segments) {
       if (seg.type === 'static') {
-        if (!node.s) node.s = new Map();
+        if (!node.s) {
+          // Can't add new routes after compile, only update existing
+          if (this.isCompiled) {
+            throw new Error(`Cannot add new route ${path} after compile() - route doesn't exist`);
+          }
+          node.s = new Map();
+        }
         let child = node.s.get(seg.value);
         if (!child) {
+          if (this.isCompiled) {
+            throw new Error(`Cannot add new route ${path} after compile() - route doesn't exist`);
+          }
           child = {};
           node.s.set(seg.value, child);
         }
         node = child;
       } else if (seg.type === 'param') {
-        if (!node.p) node.p = { name: seg.value, node: {} };
+        if (!node.p) {
+          if (this.isCompiled) {
+            throw new Error(`Cannot add new route ${path} after compile() - route doesn't exist`);
+          }
+          node.p = { name: seg.value, node: {} };
+        }
         node = node.p.node;
       } else {
-        if (!node.w) node.w = {};
+        if (!node.w) {
+          if (this.isCompiled) {
+            throw new Error(`Cannot add new route ${path} after compile() - route doesn't exist`);
+          }
+          node.w = {};
+        }
         node = node.w;
       }
     }
+
+    // Update or add handlers (this works even after freeze because we kept m unfrozen)
     if (!node.m) node.m = new Map();
     node.m.set(method, handlers);
   }

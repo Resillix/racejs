@@ -16,7 +16,7 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { EventEmitter } from 'node:events';
-import { hasParcelWatcher, createWatcherBackend } from './watcher-backend.js';
+import { hasParcelWatcher, createWatcherBackend, } from './watcher-backend.js';
 class TypedEmitter extends EventEmitter {
     on(event, listener) {
         return super.on(event, listener);
@@ -274,7 +274,8 @@ export class SmartWatcher extends TypedEmitter {
     watchDirWithBackend(dir) {
         if (!this.watcherBackend)
             return;
-        this.watcherBackend.subscribe(dir, (err, events) => {
+        this.watcherBackend
+            .subscribe(dir, (err, events) => {
             if (err) {
                 this.emit('error', err);
                 return;
@@ -302,9 +303,11 @@ export class SmartWatcher extends TypedEmitter {
                     }
                 });
             }
-        }, { ignore: this.opts.ignore.filter((p) => typeof p === 'string') }).then(subscription => {
+        }, { ignore: this.opts.ignore.filter((p) => typeof p === 'string') })
+            .then((subscription) => {
             this.backendSubscriptions.set(dir, subscription);
-        }).catch(e => {
+        })
+            .catch((e) => {
             this.emit('error', e);
         });
     }

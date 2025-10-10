@@ -7,6 +7,8 @@ export interface RouteUpdate {
 export declare class RouteSwapper {
     /**
      * Swap multiple routes atomically when router exposes update APIs; otherwise fallback to remove/add.
+     *
+     * Note: Does NOT call compile() - hot reload requires mutable routes
      */
     swapRoutes(router: Router, updates: RouteUpdate[]): void;
 }

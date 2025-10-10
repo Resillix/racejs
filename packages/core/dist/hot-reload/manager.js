@@ -48,6 +48,7 @@ export class HotReloadManager extends EventEmitter {
             this.emit('reloading', { files });
             const start = Date.now();
             const errors = [];
+            // Always wrap in try-catch to ensure watcher continues after errors
             try {
                 const results = await this.reloader.reloadMultiple(files);
                 const updates = [];
@@ -55,7 +56,8 @@ export class HotReloadManager extends EventEmitter {
                     if (!res.success) {
                         if (res.error)
                             errors.push(res.error);
-                        break;
+                        // Don't break - continue trying other files
+                        continue;
                     }
                     const mod = res.module;
                     if (!mod)
@@ -65,18 +67,29 @@ export class HotReloadManager extends EventEmitter {
                     if (Array.isArray(routeDefs))
                         updates.push(...routeDefs);
                 }
-                if (this.router && updates.length) {
-                    this.swapper.swapRoutes(this.router, updates);
+                // Only swap routes if we have valid updates and no errors
+                if (this.router && updates.length && errors.length === 0) {
+                    try {
+                        this.swapper.swapRoutes(this.router, updates);
+                    }
+                    catch (swapError) {
+                        errors.push(swapError);
+                    }
                 }
             }
             catch (e) {
+                // Catch any unexpected errors to prevent watcher from stopping
                 errors.push(e);
             }
             const duration = Date.now() - start;
-            if (errors.length)
+            // Always emit result - success or error
+            if (errors.length > 0) {
                 this.emit('reload-error', { files, errors, duration });
-            else
+            }
+            else {
                 this.emit('reloaded', { files, duration });
+            }
+            // Watcher continues regardless of errors - ready for next change
         });
         this.watcher.on('error', (e) => this.emit('reload-error', { files: [], errors: [e], duration: 0 }));
         void this.watcher.start();

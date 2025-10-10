@@ -59,6 +59,8 @@ export declare class Application {
     /**
      * Compile routes for optimal performance
      * Call before starting server
+     *
+     * Note: Compilation is skipped when hot reload is enabled to allow route updates
      */
     compile(): this;
     /**

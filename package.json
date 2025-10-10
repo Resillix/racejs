@@ -12,6 +12,7 @@
   "bugs": {
     "url": "https://github.com/resillix/racejs/issues"
   },
+  "private": true,
   "type": "module",
   "keywords": [
     "racejs",

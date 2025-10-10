@@ -25,17 +25,29 @@ export class ModuleReloader {
       const mod = await import(url + bust);
       return { success: true, module: mod };
     } catch (err) {
-      return { success: false, error: err instanceof Error ? err : new Error(String(err)) };
+      // Enhance error with module path info
+      const error = err instanceof Error ? err : new Error(String(err));
+
+      // Add file path to error message if not present
+      if (!error.message.includes(modulePath)) {
+        error.message = `Failed to reload ${modulePath}: ${error.message}`;
+      }
+
+      return { success: false, error };
     }
   }
 
   async reloadMultiple(modulePaths: string[]): Promise<Map<string, ReloadResult>> {
     const results = new Map<string, ReloadResult>();
+
+    // Process all files, even if some fail
+    // This ensures we capture all errors and continue watching
     for (const p of modulePaths) {
       const r = await this.reload(p);
       results.set(p, r);
-      if (!r.success) break;
+      // Continue processing other files even on error
     }
+
     return results;
   }
 }

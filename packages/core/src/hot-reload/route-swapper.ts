@@ -9,13 +9,15 @@ export interface RouteUpdate {
 export class RouteSwapper {
   /**
    * Swap multiple routes atomically when router exposes update APIs; otherwise fallback to remove/add.
+   *
+   * Note: Does NOT call compile() - hot reload requires mutable routes
    */
   swapRoutes(router: Router, updates: RouteUpdate[]): void {
     const rAny = router as any;
     if (typeof rAny.updateRouteHandlers === 'function') {
       // Prefer atomic updates when available
       for (const u of updates) rAny.updateRouteHandlers(u.method, u.path, u.handlers);
-      if (typeof rAny.compile === 'function') rAny.compile();
+      // Don't compile - hot reload needs mutable routes
       return;
     }
 
@@ -25,6 +27,6 @@ export class RouteSwapper {
       if (typeof rAny.removeRoute === 'function') rAny.removeRoute(u.method, u.path);
       (router as any).addRoute(u.method, u.path, u.handlers);
     }
-    if (typeof rAny.compile === 'function') rAny.compile();
+    // Don't compile - hot reload needs mutable routes
   }
 }

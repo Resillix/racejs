@@ -73,30 +73,49 @@ export class HotReloadManager extends EventEmitter {
       const start = Date.now();
 
       const errors: Error[] = [];
+
+      // Always wrap in try-catch to ensure watcher continues after errors
       try {
         const results = await this.reloader.reloadMultiple(files);
         const updates: RouteUpdate[] = [];
+
         for (const [, res] of results) {
           if (!res.success) {
             if (res.error) errors.push(res.error);
-            break;
+            // Don't break - continue trying other files
+            continue;
           }
           const mod = res.module;
           if (!mod) continue;
+
           // Convention: export const routes = [{ method, path, handlers }]
           const routeDefs = (mod.routes || mod.default?.routes) as RouteUpdate[] | undefined;
           if (Array.isArray(routeDefs)) updates.push(...routeDefs);
         }
-        if (this.router && updates.length) {
-          this.swapper.swapRoutes(this.router, updates);
+
+        // Only swap routes if we have valid updates and no errors
+        if (this.router && updates.length && errors.length === 0) {
+          try {
+            this.swapper.swapRoutes(this.router, updates);
+          } catch (swapError) {
+            errors.push(swapError as Error);
+          }
         }
       } catch (e) {
+        // Catch any unexpected errors to prevent watcher from stopping
         errors.push(e as Error);
       }
 
       const duration = Date.now() - start;
-      if (errors.length) this.emit('reload-error', { files, errors, duration });
-      else this.emit('reloaded', { files, duration });
+
+      // Always emit result - success or error
+      if (errors.length > 0) {
+        this.emit('reload-error', { files, errors, duration });
+      } else {
+        this.emit('reloaded', { files, duration });
+      }
+
+      // Watcher continues regardless of errors - ready for next change
     });
 
     this.watcher.on('error', (e) =>

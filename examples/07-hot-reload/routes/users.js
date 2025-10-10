@@ -8,15 +8,15 @@
 const users = [
   { id: 1, name: 'Alice', email: 'alice@example.com' },
   { id: 2, name: 'Bob', email: 'bob@example.com' },
-  { id: 3, name: 'Charlie', email: 'charlie@example.com' }
+  { id: 3, name: 'Charlie', email: 'charlie@example.com' },
 ];
 
 const getUsers = (req, res) => {
   res.json({
     success: true,
-    message: 'Users fetched successfully',
+    message: 'Users fetched - Error FIXED! v3',
     data: users,
-    version: 1, // Increment this to see hot reload in action!
+    version: 3, // Changed after fixing error!
     count: users.length,
   });
 };
@@ -37,7 +37,7 @@ const createUser = (req, res) => {
 };
 
 const getUserById = (req, res) => {
-  const user = users.find(u => u.id === parseInt(req.params.id));
+  const user = users.find((u) => u.id === parseInt(req.params.id));
 
   if (!user) {
     return res.status(404).json({

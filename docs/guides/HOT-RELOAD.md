@@ -26,23 +26,27 @@ app.listen(3000);
 ## ✨ Features
 
 ### Zero Configuration
+
 - Automatically enabled in development (`NODE_ENV !== 'production'`)
 - Auto-detects route directories (`routes/`, `src/routes/`, `api/`, etc.)
 - Works out of the box with sensible defaults
 
 ### Zero Downtime
+
 - Server keeps running during reloads
 - In-flight requests complete normally
 - New requests immediately use updated handlers
 - No dropped connections
 
 ### Native Performance
+
 - Uses **@parcel/watcher** (Native C++) when available
 - Falls back to `fs.watch` gracefully
 - Typical reload time: **< 20ms**
 - Minimal CPU and memory overhead
 
 ### Developer Experience
+
 - Real-time console feedback
 - Clear reload notifications
 - File change summaries
@@ -50,10 +54,39 @@ app.listen(3000);
 
 ## 📊 Console Output
 
+### Successful Reload
+
 ```
 🔥 Hot reload enabled (🚀 @parcel/watcher) for: [ '/path/to/routes' ]
 ♻️  Reloading: users.js
 ✅ Reloaded in 12ms
+```
+
+### Error During Reload (Like Next.js!)
+
+```
+================================================================================
+❌ Hot Reload Failed
+================================================================================
+
+📁 Files:
+   routes/users.js
+
+🔴 Error 1:
+   Failed to reload /path/to/routes/users.js: Unexpected token '}'
+
+📍 Stack Trace:
+   at file:///path/to/routes/users.js:5:3
+   at ModuleJob.run (node:internal/modules/esm/module_job:194:25)
+
+💡 This looks like a syntax error. Check your code for:
+   - Missing brackets, braces, or parentheses
+   - Incorrect comma or semicolon placement
+   - Typos in variable or function names
+
+================================================================================
+Fix the error(s) above and save to retry hot reload.
+================================================================================
 ```
 
 ## 🏗️ How It Works
@@ -115,10 +148,10 @@ const app = createApp({
   hotReload: {
     enabled: true,
     roots: ['./routes', './api'], // Directories to watch
-    debounceMs: 100,               // Debounce delay
-    batchMs: 200,                  // Batch window
-    ignore: ['*.test.js'],         // Ignore patterns
-  }
+    debounceMs: 100, // Debounce delay
+    batchMs: 200, // Batch window
+    ignore: ['*.test.js'], // Ignore patterns
+  },
 });
 ```
 
@@ -127,7 +160,7 @@ const app = createApp({
 ```javascript
 // Completely disabled
 const app = createApp({
-  hotReload: false
+  hotReload: false,
 });
 ```
 
@@ -137,8 +170,8 @@ const app = createApp({
 // NOT recommended - for debugging only
 const app = createApp({
   hotReload: {
-    enabled: true // Overrides production check
-  }
+    enabled: true, // Overrides production check
+  },
 });
 ```
 
@@ -155,6 +188,7 @@ const app = createApp({
 ```
 
 **@parcel/watcher** is optional but recommended for best performance:
+
 - Native C++ implementation
 - Faster file change detection (< 10ms)
 - Lower CPU usage
@@ -198,7 +232,7 @@ module.exports = (app) => {
   app.get('/users', (req, res) => {
     res.json({ users: getUserList() });
   });
-  
+
   app.post('/users', (req, res) => {
     const user = createUser(req.body);
     res.json(user);
@@ -218,8 +252,8 @@ const app = createApp();
 // Load all route files
 const routesDir = path.join(__dirname, 'routes');
 fs.readdirSync(routesDir)
-  .filter(f => f.endsWith('.js'))
-  .forEach(file => {
+  .filter((f) => f.endsWith('.js'))
+  .forEach((file) => {
     require(path.join(routesDir, file))(app);
   });
 
@@ -238,12 +272,14 @@ app.listen(3000);
 ### What Gets Reloaded
 
 ✅ **Automatically reloaded:**
+
 - Route handlers
 - Middleware functions
 - Helper functions in route files
 - Required modules (cache cleared)
 
 ❌ **Requires restart:**
+
 - Server configuration
 - Port changes
 - Environment variables
@@ -254,14 +290,14 @@ app.listen(3000);
 
 ### Benchmarks
 
-| Operation | Time | Backend |
-|-----------|------|---------|
-| File change detection | < 10ms | @parcel/watcher |
-| File change detection | ~50ms | fs.watch |
-| Module cache clear | ~5ms | Always |
-| Route swap | ~3ms | Always |
-| **Total reload** | **< 20ms** | **@parcel/watcher** |
-| Total reload | ~60ms | fs.watch |
+| Operation             | Time       | Backend             |
+| --------------------- | ---------- | ------------------- |
+| File change detection | < 10ms     | @parcel/watcher     |
+| File change detection | ~50ms      | fs.watch            |
+| Module cache clear    | ~5ms       | Always              |
+| Route swap            | ~3ms       | Always              |
+| **Total reload**      | **< 20ms** | **@parcel/watcher** |
+| Total reload          | ~60ms      | fs.watch            |
 
 ### Resource Usage
 
@@ -275,6 +311,7 @@ app.listen(3000);
 ### Hot Reload Not Working
 
 **Check if enabled:**
+
 ```javascript
 // In development, should log hot reload status
 app.listen(3000, () => {
@@ -284,6 +321,7 @@ app.listen(3000, () => {
 ```
 
 **Check NODE_ENV:**
+
 ```bash
 # Should be empty or 'development'
 echo $NODE_ENV
@@ -293,6 +331,7 @@ NODE_ENV=development node server.js
 ```
 
 **Check file location:**
+
 - Files must be in watched directories
 - Default: `routes/`, `src/routes/`, `api/`, `src/api/`, `src/`, `lib/`
 - Or specify custom paths in config
@@ -300,36 +339,35 @@ NODE_ENV=development node server.js
 ### Changes Not Detected
 
 **File not in watched directory:**
+
 ```javascript
 // Add custom watch paths
 const app = createApp({
   hotReload: {
-    roots: [
-      './routes',
-      './controllers',
-      './custom-path'
-    ]
-  }
+    roots: ['./routes', './controllers', './custom-path'],
+  },
 });
 ```
 
 **File ignored by pattern:**
+
 ```javascript
 // Check ignore patterns
 const app = createApp({
   hotReload: {
     ignore: [
-      '*.test.js',    // Ignored
-      '*.spec.js',    // Ignored
-      'node_modules/**' // Ignored by default
-    ]
-  }
+      '*.test.js', // Ignored
+      '*.spec.js', // Ignored
+      'node_modules/**', // Ignored by default
+    ],
+  },
 });
 ```
 
 ### Slow Reloads
 
 **Install @parcel/watcher:**
+
 ```bash
 npm install --save-optional @parcel/watcher
 # or
@@ -337,36 +375,40 @@ pnpm add -D @parcel/watcher
 ```
 
 **Reduce watched files:**
+
 ```javascript
 // Be specific with watch paths
 const app = createApp({
   hotReload: {
     roots: ['./routes'], // Only watch routes, not entire src/
-    ignore: ['*.test.js', '*.md']
-  }
+    ignore: ['*.test.js', '*.md'],
+  },
 });
 ```
 
 **Adjust timing:**
+
 ```javascript
 // Reduce debounce for faster reloads
 const app = createApp({
   hotReload: {
-    debounceMs: 50,  // Default: 100ms
-    batchMs: 100     // Default: 200ms
-  }
+    debounceMs: 50, // Default: 100ms
+    batchMs: 100, // Default: 200ms
+  },
 });
 ```
 
 ### Module Cache Issues
 
 **Clear cache manually if needed:**
+
 ```javascript
 // In rare cases, force module reload
 delete require.cache[require.resolve('./problematic-module')];
 ```
 
 **Restart for deep changes:**
+
 - Changing dependencies of dependencies
 - Modifying native modules
 - Altering core application structure
@@ -413,23 +455,26 @@ See working examples in `/examples`:
 
 ## ❓ FAQ
 
-**Q: Do I need to install @parcel/watcher?**  
+**Q: Do I need to install @parcel/watcher?**
 A: No, it's optional. RaceJS works without it, but @parcel/watcher provides better performance.
 
-**Q: Does hot reload work in production?**  
+**Q: Does hot reload work in production?**
 A: No, it's automatically disabled in production. You can force-enable it, but it's not recommended.
 
-**Q: Will hot reload work with TypeScript?**  
+**Q: Will hot reload work with TypeScript?**
 A: Yes, if you compile TypeScript to JavaScript and watch the compiled files.
 
-**Q: Can I use this with Docker?**  
+**Q: Can I use this with Docker?**
 A: Yes, but you may need to configure volume mounts properly for file watching to work.
 
-**Q: What's the difference from nodemon?**  
+**Q: What's the difference from nodemon?**
 A: Nodemon restarts your entire server. RaceJS hot reload only reloads changed modules without restarting - zero downtime!
 
-**Q: Does it handle syntax errors?**  
-A: Yes, syntax errors are caught and logged without crashing your server.
+**Q: Does it handle syntax errors?**
+A: Yes! Syntax errors are caught and displayed with detailed error messages, line numbers, and stack traces - just like Next.js. Your server keeps running and you can fix the error and save to retry.
+
+**Q: What happens if my code has an error?**
+A: The hot reload will fail gracefully and display a detailed error report in the terminal, including the file path, error message, stack trace, and helpful suggestions. Your server continues running with the previous working code.
 
 ---
 

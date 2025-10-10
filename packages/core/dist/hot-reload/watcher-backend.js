@@ -64,7 +64,7 @@ class NativeWatcherBackend {
                 return;
             const fullPath = path.join(dir, filename);
             // Check if ignored
-            if (options?.ignore?.some(pattern => {
+            if (options?.ignore?.some((pattern) => {
                 const regex = new RegExp(pattern.replace(/\*/g, '.*'));
                 return regex.test(fullPath);
             })) {

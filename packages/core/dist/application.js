@@ -42,14 +42,7 @@ export class Application {
         const cwd = process.cwd();
         const autoDetectDirs = [];
         // Common patterns for route directories
-        const candidates = [
-            'src/routes',
-            'src/api',
-            'routes',
-            'api',
-            'src',
-            'lib',
-        ];
+        const candidates = ['src/routes', 'src/api', 'routes', 'api', 'src', 'lib'];
         for (const candidate of candidates) {
             const fullPath = path.resolve(cwd, candidate);
             if (existsSync(fullPath)) {
@@ -74,6 +67,8 @@ export class Application {
             };
         this.hotReload = new HotReloadManager(hotReloadConfig);
         this.hotReload.setRouter(this.router);
+        // Enable hot reload mode on router (prevents freezing)
+        this.router.enableHotReload();
         // Wire up events
         this.hotReload.on('started', () => {
             if (isDev) {
@@ -93,8 +88,41 @@ export class Application {
                 console.log(`✅ Reloaded in ${duration}ms`);
             }
         });
-        this.hotReload.on('reload-error', ({ errors }) => {
-            console.error('❌ Hot reload error:', errors[0]?.message || 'Unknown error');
+        this.hotReload.on('reload-error', ({ files, errors }) => {
+            console.error('\n' + '='.repeat(80));
+            console.error('❌ Hot Reload Failed');
+            console.error('='.repeat(80));
+            if (files && files.length > 0) {
+                console.error('\n📁 Files:');
+                files.forEach((file) => {
+                    console.error(`   ${path.relative(cwd, file)}`);
+                });
+            }
+            errors.forEach((error, index) => {
+                console.error(`\n🔴 Error ${index + 1}:`);
+                console.error(`   ${error.message}`);
+                if (error.stack) {
+                    // Parse and format stack trace
+                    const stack = error.stack.split('\n').slice(1); // Skip first line (message)
+                    const relevantStack = stack.filter((line) => !line.includes('node_modules')).slice(0, 5); // Show top 5 relevant frames
+                    if (relevantStack.length > 0) {
+                        console.error('\n📍 Stack Trace:');
+                        relevantStack.forEach((line) => {
+                            console.error(`   ${line.trim()}`);
+                        });
+                    }
+                }
+                // Show syntax error details if available
+                if (error instanceof SyntaxError) {
+                    console.error('\n💡 This looks like a syntax error. Check your code for:');
+                    console.error('   - Missing brackets, braces, or parentheses');
+                    console.error('   - Incorrect comma or semicolon placement');
+                    console.error('   - Typos in variable or function names');
+                }
+            });
+            console.error('\n' + '='.repeat(80));
+            console.error('Fix the error(s) above and save to retry hot reload.');
+            console.error('='.repeat(80) + '\n');
         });
     }
     use(pathOrHandler, handler) {
@@ -157,10 +185,17 @@ export class Application {
     /**
      * Compile routes for optimal performance
      * Call before starting server
+     *
+     * Note: Compilation is skipped when hot reload is enabled to allow route updates
      */
     compile() {
         if (this.compiled)
             return this;
+        // Skip compilation if hot reload is enabled (routes need to be mutable)
+        if (this.hotReload && this.options.hotReload !== false) {
+            console.log('ℹ️  Skipping compile() - hot reload requires mutable routes');
+            return this;
+        }
         this.router.compile();
         this.compiled = true;
         return this;
@@ -234,10 +269,7 @@ export class Application {
             req.params = match.params;
         }
         // Build handler chain: global middleware + route handlers
-        const handlers = [
-            ...this.globalMiddleware,
-            ...(match?.handlers || []),
-        ];
+        const handlers = [...this.globalMiddleware, ...(match?.handlers || [])];
         // Handle 404 if no route matched
         if (!match) {
             if (!res.headersSent) {

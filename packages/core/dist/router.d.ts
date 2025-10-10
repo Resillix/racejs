@@ -42,6 +42,7 @@ export interface RouteMatch {
 export declare class Router {
     private root;
     private isCompiled;
+    private hotReloadMode;
     /**
      * Add a route to the router
      * @param method HTTP method (GET, POST, etc.)
@@ -65,13 +66,21 @@ export declare class Router {
      */
     private parsePath;
     /**
+     * Enable hot reload mode (disables freezing for route updates)
+     */
+    enableHotReload(): void;
+    /**
      * Freeze router structure to enable V8 optimizations
      * Call after all routes are registered
+     *
+     * Note: Skipped when hot reload mode is enabled
      */
     compile(): void;
     /**
      * Recursively freeze node structures to create monomorphic shapes
      * Enables V8 inline caching and hidden class optimization
+     *
+     * Note: We don't freeze the handler map (node.m) to allow hot reload
      */
     private freezeNode;
     /**
@@ -82,6 +91,8 @@ export declare class Router {
     /**
      * Update handlers for an existing route atomically (if present),
      * or add it when missing. Used by RouteSwapper.
+     *
+     * Note: This works even after compile() because we don't freeze handler maps
      */
     updateRouteHandlers(method: string, path: string, handlers: Handler[]): void;
     /**
