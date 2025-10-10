@@ -1,6 +1,6 @@
 {
   "name": "@racejs/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "⚡️ High-performance core engine for RaceJS framework",
   "type": "module",
   "main": "./dist/index.js",

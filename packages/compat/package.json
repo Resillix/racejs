@@ -1,6 +1,6 @@
 {
   "name": "@racejs/compat",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "⚡️ Express 4.x compatibility layer for RaceJS",
   "type": "module",
   "main": "./dist/index.js",
