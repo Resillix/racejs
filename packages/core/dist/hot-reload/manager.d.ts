@@ -3,6 +3,7 @@
  * for dependency-aware module reloads and route hot swapping.
  */
 import { EventEmitter } from 'node:events';
+import { type ValidationResult } from './syntax-validator.js';
 import type { Router } from '../router.js';
 export interface HotReloadOptions {
     enabled?: boolean;
@@ -11,6 +12,7 @@ export interface HotReloadOptions {
     batchMs?: number;
     pollFallbackMs?: number;
     ignore?: (string | RegExp)[];
+    validateSyntax?: boolean;
 }
 export interface ReloadEvents {
     started: () => void;
@@ -25,6 +27,11 @@ export interface ReloadEvents {
         files: string[];
         errors: Error[];
         duration: number;
+        validationResults?: Map<string, ValidationResult>;
+    }) => void;
+    'syntax-error': (info: {
+        files: string[];
+        validationResults: Map<string, ValidationResult>;
     }) => void;
     stopped: () => void;
 }
@@ -33,6 +40,7 @@ export declare class HotReloadManager extends EventEmitter {
     private options;
     private reloader;
     private swapper;
+    private validator;
     private router;
     constructor(opts?: HotReloadOptions);
     /** Attach app router for route hot swapping */

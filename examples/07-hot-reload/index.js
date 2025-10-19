@@ -12,12 +12,26 @@ const { createApp, hasParcelWatcher } = require('../../packages/core/dist/index.
 
 // Create app - hot reload is automatically enabled in development!
 // Zero configuration needed - it just works! 🎉
-const app = createApp();
+const app = createApp({
+  devMode: {
+    enabled: true,
+    verbose: true,
+    devtools: true,
+    recorder: true,
+    profiler: true,
+  },
+});
 
 // Log hot reload backend info
 console.log('\n🔍 Hot Reload Backend Detection:');
-console.log('   @parcel/watcher available:', hasParcelWatcher() ? '✅ Yes' : '❌ No (using fs.watch fallback)');
-console.log('   Backend:', hasParcelWatcher() ? '🚀 @parcel/watcher (native, fast)' : '📁 fs.watch (Node.js built-in)');
+console.log(
+  '   @parcel/watcher available:',
+  hasParcelWatcher() ? '✅ Yes' : '❌ No (using fs.watch fallback)'
+);
+console.log(
+  '   Backend:',
+  hasParcelWatcher() ? '🚀 @parcel/watcher (native, fast)' : '📁 fs.watch (Node.js built-in)'
+);
 
 // Define routes directly
 app.get('/users', (req, res) => {

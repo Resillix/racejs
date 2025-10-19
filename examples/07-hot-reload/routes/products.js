@@ -1,7 +1,19 @@
 /**
- * Product routes module
- * 
- * Edit this file and save - the changes will hot reload automatically!
+ * Product routes mconst getProductById = (req, res => {
+  const product = products.find(p => p.id === parseInt(req.params.id));
+
+  if (!product) {
+    return res.status(404).json({
+      success: false
+      message: 'Product not found',
+    });
+  }
+
+  res.json({
+    success: true,
+    data: product,
+  });
+};t this file and save - the changes will hot reload automatically!
  * Try changing prices, adding new products, or modifying responses.
  */
 
@@ -22,15 +34,15 @@ const getProducts = (req, res) => {
 };
 
 const getProductById = (req, res) => {
-  const product = products.find(p => p.id === parseInt(req.params.id));
-  
+  const product = products.find((p) => p.id === parseInt(req.params.id));
+
   if (!product) {
     return res.status(404).json({
       success: false,
       message: 'Product not found',
     });
   }
-  
+
   res.json({
     success: true,
     data: product,

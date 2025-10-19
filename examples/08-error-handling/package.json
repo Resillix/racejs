@@ -1,0 +1,23 @@
+{
+  "name": "racejs-error-handling-example",
+  "version": "1.0.0",
+  "description": "RaceJS Phase 5: Error Handler & Aggregation demonstration",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "racejs",
+    "error-handling",
+    "devtools",
+    "error-aggregation",
+    "example"
+  ],
+  "dependencies": {
+    "@racejs/core": "workspace:*"
+  },
+  "author": "RaceJS Team",
+  "license": "MIT"
+}

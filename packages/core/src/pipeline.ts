@@ -95,14 +95,9 @@ export async function runPipeline(
     if (errorHandler) {
       errorHandler(err, req, res);
     } else {
-      // Default error handling
-      if (!res.headersSent) {
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain');
-      }
-      if (!res.writableEnded) {
-        res.end('Internal Server Error');
-      }
+      // Re-throw error to allow application-level error handling
+      // This enables dev mode error handler to work
+      throw err;
     }
   }
 }
@@ -198,10 +193,7 @@ export interface LifecycleHooks {
 /**
  * Run lifecycle hooks with minimal overhead
  */
-export function runHooks(
-  hooks: Array<(...args: any[]) => void> | undefined,
-  ...args: any[]
-): void {
+export function runHooks(hooks: Array<(...args: any[]) => void> | undefined, ...args: any[]): void {
   if (!hooks || hooks.length === 0) return;
 
   for (let i = 0; i < hooks.length; i++) {

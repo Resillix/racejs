@@ -1,7 +1,18 @@
 /**
- * User routes module
- *
- * Edit this file and save - the changes will hot reload automatically!
+ * User routes moduconst createUser = (req, res) => {
+  const newUser = {
+    id: users.length + 1,
+    name: 'New User',
+    email: 'newuser@example.com',
+  };
+  users.push(newUser);
+
+  res.status(201).json({
+    success: true,
+    message: 'User created successfully',
+    data: newUser,
+  });
+};this file and save - the changes will hot reload automatically!
  * Try changing the response messages or adding new routes.
  */
 
@@ -14,9 +25,9 @@ const users = [
 const getUsers = (req, res) => {
   res.json({
     success: true,
-    message: 'Users fetched - Error FIXED! v3',
+    message: 'Users fetched - Error FIXED! v5',
     data: users,
-    version: 3, // Changed after fixing error!
+    version: 5, // Changed after fixing error!
     count: users.length,
   });
 };

@@ -71,14 +71,9 @@ export async function runPipeline(req, res, handlers, errorHandler) {
             errorHandler(err, req, res);
         }
         else {
-            // Default error handling
-            if (!res.headersSent) {
-                res.statusCode = 500;
-                res.setHeader('Content-Type', 'text/plain');
-            }
-            if (!res.writableEnded) {
-                res.end('Internal Server Error');
-            }
+            // Re-throw error to allow application-level error handling
+            // This enables dev mode error handler to work
+            throw err;
         }
     }
 }

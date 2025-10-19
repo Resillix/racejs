@@ -11,9 +11,18 @@ export { runPipeline, runPipelineSync } from './pipeline.js';
 // Hot reload utilities
 export { SmartWatcher, } from './hot-reload/smart-watcher.js';
 export { HotReloadManager } from './hot-reload/manager.js';
+/**
+ * @internal - These APIs may change without notice
+ */
 export { ModuleReloader } from './hot-reload/module-reloader.js';
 export { RouteSwapper } from './hot-reload/route-swapper.js';
 export { hasParcelWatcher, createWatcherBackend, } from './hot-reload/watcher-backend.js';
+// Dev mode utilities
+export { DevModeManager, createDevMode, DevLogger, createDevLogger, ConsoleTransport, JsonTransport, RequestRecorder, createRequestRecorder, } from './dev/index.js';
+/**
+ * @internal - Storage implementation details
+ */
+export { MemoryStorage } from './dev/index.js';
 /**
  * Default export for convenience
  */

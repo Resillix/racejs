@@ -9,21 +9,48 @@ import { runPipeline } from './pipeline.js';
 import { createRequest } from './request.js';
 import { Response } from './response.js';
 import { HotReloadManager } from './hot-reload/manager.js';
+import { DevModeManager } from './dev/manager.js';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
+import { performance } from 'node:perf_hooks';
 export class Application {
     router;
     server;
     globalMiddleware = [];
-    errorHandler;
     settings = new Map();
     compiled = false;
     hotReload;
+    devMode;
     options;
     constructor(options = {}) {
         this.options = options;
         this.router = new Router();
+        this.setupDevMode();
         this.setupHotReload();
+    }
+    /**
+     * Setup dev mode for enhanced developer experience
+     * Auto-enables in development with zero configuration
+     */
+    setupDevMode() {
+        // Skip if disabled explicitly
+        if (this.options.devMode === false)
+            return;
+        // Auto-enable in development
+        const isDev = process.env.NODE_ENV !== 'production';
+        if (!isDev && this.options.devMode !== true && typeof this.options.devMode !== 'object') {
+            return;
+        }
+        try {
+            this.devMode = new DevModeManager(this.options.devMode || true);
+            this.devMode.setApplication(this);
+        }
+        catch (error) {
+            // Dev mode failed to initialize, continue without it
+            if (isDev) {
+                console.warn('⚠️  Dev mode initialization failed:', error);
+            }
+        }
     }
     /**
      * Setup built-in hot reload for development
@@ -65,65 +92,11 @@ export class Application {
                 enabled: true,
                 roots: autoDetectDirs,
             };
+        // Initialize hot reload manager
         this.hotReload = new HotReloadManager(hotReloadConfig);
         this.hotReload.setRouter(this.router);
         // Enable hot reload mode on router (prevents freezing)
         this.router.enableHotReload();
-        // Wire up events
-        this.hotReload.on('started', () => {
-            if (isDev) {
-                const backend = this.hotReload.getActiveBackend();
-                const backendEmoji = backend === 'parcel' ? '🚀' : '📁';
-                const backendName = backend === 'parcel' ? '@parcel/watcher' : 'fs.watch';
-                console.log(`🔥 Hot reload enabled (${backendEmoji} ${backendName}) for:`, hotReloadConfig.roots);
-            }
-        });
-        this.hotReload.on('reloading', ({ files }) => {
-            if (isDev) {
-                console.log('♻️  Reloading:', files.map((f) => path.relative(cwd, f)).join(', '));
-            }
-        });
-        this.hotReload.on('reloaded', ({ duration }) => {
-            if (isDev) {
-                console.log(`✅ Reloaded in ${duration}ms`);
-            }
-        });
-        this.hotReload.on('reload-error', ({ files, errors }) => {
-            console.error('\n' + '='.repeat(80));
-            console.error('❌ Hot Reload Failed');
-            console.error('='.repeat(80));
-            if (files && files.length > 0) {
-                console.error('\n📁 Files:');
-                files.forEach((file) => {
-                    console.error(`   ${path.relative(cwd, file)}`);
-                });
-            }
-            errors.forEach((error, index) => {
-                console.error(`\n🔴 Error ${index + 1}:`);
-                console.error(`   ${error.message}`);
-                if (error.stack) {
-                    // Parse and format stack trace
-                    const stack = error.stack.split('\n').slice(1); // Skip first line (message)
-                    const relevantStack = stack.filter((line) => !line.includes('node_modules')).slice(0, 5); // Show top 5 relevant frames
-                    if (relevantStack.length > 0) {
-                        console.error('\n📍 Stack Trace:');
-                        relevantStack.forEach((line) => {
-                            console.error(`   ${line.trim()}`);
-                        });
-                    }
-                }
-                // Show syntax error details if available
-                if (error instanceof SyntaxError) {
-                    console.error('\n💡 This looks like a syntax error. Check your code for:');
-                    console.error('   - Missing brackets, braces, or parentheses');
-                    console.error('   - Incorrect comma or semicolon placement');
-                    console.error('   - Typos in variable or function names');
-                }
-            });
-            console.error('\n' + '='.repeat(80));
-            console.error('Fix the error(s) above and save to retry hot reload.');
-            console.error('='.repeat(80) + '\n');
-        });
     }
     use(pathOrHandler, handler) {
         if (typeof pathOrHandler === 'function') {
@@ -168,8 +141,8 @@ export class Application {
     /**
      * Set error handler
      */
-    catch(handler) {
-        this.errorHandler = handler;
+    catch(_handler) {
+        // TODO: Implement error handler integration
         return this;
     }
     /**
@@ -205,27 +178,86 @@ export class Application {
         if (!this.compiled) {
             this.compile();
         }
+        // Start dev mode before server starts
+        if (this.devMode) {
+            this.devMode.start().catch((err) => {
+                console.warn('⚠️  Dev mode failed to start:', err);
+            });
+        }
         // Start hot reload before server starts
         if (this.hotReload) {
             this.hotReload.start();
         }
         const host = typeof hostOrCallback === 'string' ? hostOrCallback : undefined;
         const cb = typeof hostOrCallback === 'function' ? hostOrCallback : callback;
+        // Wrap callback to configure dev mode after server starts
+        const wrappedCallback = () => {
+            // Configure replay engine with actual server port
+            if (this.devMode) {
+                this.devMode.setServerInfo(port, host);
+            }
+            // Call original callback
+            if (cb)
+                cb();
+        };
         this.server = createServer((req, res) => {
             this.handleRequest(req, res);
         });
         if (host) {
-            this.server.listen(port, host, cb);
+            this.server.listen(port, host, wrappedCallback);
         }
         else {
-            this.server.listen(port, cb);
+            this.server.listen(port, wrappedCallback);
         }
         return this.server;
+    }
+    /**
+     * Get hot reload manager for event subscription
+     * Users can subscribe to events like 'started', 'reloading', 'reloaded', 'syntax-error', 'reload-error'
+     *
+     * @example
+     * ```ts
+     * const app = createApp({ hotReload: true });
+     * const hotReload = app.getHotReload();
+     * if (hotReload) {
+     *   hotReload.on('reloaded', ({ duration }) => {
+     *     console.log(`Reloaded in ${duration}ms`);
+     *   });
+     * }
+     * ```
+     */
+    getHotReload() {
+        return this.hotReload;
+    }
+    /**
+     * Get dev mode manager for accessing logger, metrics, and dev features
+     *
+     * @example
+     * ```ts
+     * const app = createApp({ devMode: true });
+     * const devMode = app.getDevMode();
+     * if (devMode) {
+     *   const logger = devMode.getLogger();
+     *   logger.info('Custom log', { userId: 123 });
+     *
+     *   const metrics = devMode.getMetrics();
+     *   console.log('Total requests:', metrics.totalRequests);
+     * }
+     * ```
+     */
+    getDevMode() {
+        return this.devMode;
     }
     /**
      * Close server
      */
     close(callback) {
+        // Stop dev mode
+        if (this.devMode) {
+            this.devMode.stop().catch(() => {
+                // Ignore errors during shutdown
+            });
+        }
         // Stop hot reload
         if (this.hotReload) {
             this.hotReload.stop();
@@ -239,8 +271,15 @@ export class Application {
      * This is the hot path - performance critical
      */
     async handleRequest(req, res) {
+        const startTime = performance.now();
         const method = req.method || 'GET';
         const path = req.url?.split('?')[0] || '/';
+        // Record request in dev mode if recorder enabled
+        let requestId = null;
+        const recorder = this.devMode?.getRecorder();
+        if (recorder?.isRecording()) {
+            requestId = await recorder.recordRequest(req, startTime);
+        }
         // Find matching route
         const match = this.router.find(method, path);
         // Create request/response wrappers
@@ -277,10 +316,90 @@ export class Application {
                 res.setHeader('content-type', 'text/plain');
                 res.end('Not Found');
             }
+            // Track metrics in dev mode
+            if (this.devMode) {
+                const duration = performance.now() - startTime;
+                this.devMode.recordRequest(path, method, duration, false);
+            }
+            // Record response in dev mode (404 response)
+            if (requestId && recorder) {
+                await recorder.recordResponse(requestId, res, 'Not Found', performance.now());
+            }
             return;
         }
         // Run pipeline with error handling
-        await runPipeline(req, res, handlers, this.errorHandler);
+        try {
+            // Intercept response body if recorder is enabled
+            let responseBody = null;
+            if (requestId && recorder && recorder.isRecording()) {
+                const originalEnd = res.end.bind(res);
+                const originalWrite = res.write.bind(res);
+                const chunks = [];
+                res.write = function (chunk, ...args) {
+                    if (chunk)
+                        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+                    return originalWrite(chunk, ...args);
+                };
+                res.end = function (chunk, ...args) {
+                    if (chunk)
+                        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+                    if (chunks.length > 0) {
+                        responseBody = Buffer.concat(chunks).toString('utf8');
+                    }
+                    // Record response when end is called
+                    void recorder.recordResponse(requestId, res, responseBody, performance.now()).catch(() => {
+                        // Ignore recording errors
+                    });
+                    return originalEnd(chunk, ...args);
+                };
+            }
+            // Don't pass errorHandler to pipeline - let errors bubble up to our catch block
+            // This allows DevErrorHandler to work properly
+            await runPipeline(req, res, handlers, undefined);
+            // Track successful request in dev mode
+            if (this.devMode) {
+                const duration = performance.now() - startTime;
+                this.devMode.recordRequest(path, method, duration, false);
+            }
+            // Note: Response recording is now handled in the res.end() wrapper above
+            // This prevents duplicate response recording
+        }
+        catch (error) {
+            process.stdout.write(`[Application] ERROR CAUGHT: ${error instanceof Error ? error.message : error}\n`);
+            process.stdout.write(`[Application] devMode: ${!!this.devMode}\n`);
+            process.stdout.write(`[Application] error instanceof Error: ${error instanceof Error}\n`);
+            process.stdout.write(`[Application] res.headersSent: ${res.headersSent}\n`);
+            // Handle error with beautiful error page in dev mode
+            if (this.devMode && error instanceof Error && !res.headersSent) {
+                process.stdout.write('[Application] Calling error handler...\n');
+                const errorHandler = this.devMode.getErrorHandler();
+                process.stdout.write(`[Application] errorHandler exists: ${!!errorHandler}\n`);
+                if (errorHandler) {
+                    try {
+                        await errorHandler.handle(error, req, res);
+                        // Record error response in dev mode
+                        if (requestId && recorder) {
+                            await recorder.recordResponse(requestId, res, error.message, performance.now());
+                        }
+                        return; // Error handler sends response
+                    }
+                    catch (handlerError) {
+                        // If error handler fails, fall through to default handling
+                        console.error('Error handler failed:', handlerError);
+                    }
+                }
+            }
+            // Default error handling (production or if dev error handler fails)
+            if (!res.headersSent) {
+                res.statusCode = 500;
+                res.setHeader('content-type', 'text/plain');
+                res.end('Internal Server Error');
+            }
+            // Record error response in dev mode
+            if (requestId && recorder) {
+                await recorder.recordResponse(requestId, res, error instanceof Error ? error.message : 'Error', performance.now());
+            }
+        }
     }
     /**
      * Get all registered routes

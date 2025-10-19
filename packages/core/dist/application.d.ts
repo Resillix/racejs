@@ -7,7 +7,9 @@ import { type Server, type IncomingMessage, type ServerResponse } from 'node:htt
 import { type Handler, type RouteMatch } from './router.js';
 import { Request } from './request.js';
 import { Response } from './response.js';
-import { type HotReloadOptions } from './hot-reload/manager.js';
+import { HotReloadManager, type HotReloadOptions } from './hot-reload/manager.js';
+import { DevModeManager } from './dev/manager.js';
+import type { DevModeOptions } from './dev/types.js';
 export interface AppOptions {
     /** Enable HTTP/2 support */
     http2?: boolean;
@@ -17,17 +19,24 @@ export interface AppOptions {
     compat?: boolean;
     /** Hot reload configuration (auto-enabled in development) */
     hotReload?: boolean | HotReloadOptions;
+    /** Dev mode configuration (auto-enabled in development) */
+    devMode?: boolean | DevModeOptions;
 }
 export declare class Application {
     private router;
     private server?;
     private globalMiddleware;
-    private errorHandler?;
     private settings;
     private compiled;
     private hotReload?;
+    private devMode?;
     private options;
     constructor(options?: AppOptions);
+    /**
+     * Setup dev mode for enhanced developer experience
+     * Auto-enables in development with zero configuration
+     */
+    private setupDevMode;
     /**
      * Setup built-in hot reload for development
      * Auto-detects common project structures and enables zero-config hot reloading
@@ -50,7 +59,7 @@ export declare class Application {
     /**
      * Set error handler
      */
-    catch(handler: (err: any, req: IncomingMessage, res: ServerResponse) => void): this;
+    catch(_handler: (err: any, req: IncomingMessage, res: ServerResponse) => void): this;
     /**
      * Set/get application setting
      */
@@ -68,6 +77,39 @@ export declare class Application {
      */
     listen(port: number, callback?: () => void): Server;
     listen(port: number, host: string, callback?: () => void): Server;
+    /**
+     * Get hot reload manager for event subscription
+     * Users can subscribe to events like 'started', 'reloading', 'reloaded', 'syntax-error', 'reload-error'
+     *
+     * @example
+     * ```ts
+     * const app = createApp({ hotReload: true });
+     * const hotReload = app.getHotReload();
+     * if (hotReload) {
+     *   hotReload.on('reloaded', ({ duration }) => {
+     *     console.log(`Reloaded in ${duration}ms`);
+     *   });
+     * }
+     * ```
+     */
+    getHotReload(): HotReloadManager | undefined;
+    /**
+     * Get dev mode manager for accessing logger, metrics, and dev features
+     *
+     * @example
+     * ```ts
+     * const app = createApp({ devMode: true });
+     * const devMode = app.getDevMode();
+     * if (devMode) {
+     *   const logger = devMode.getLogger();
+     *   logger.info('Custom log', { userId: 123 });
+     *
+     *   const metrics = devMode.getMetrics();
+     *   console.log('Total requests:', metrics.totalRequests);
+     * }
+     * ```
+     */
+    getDevMode(): DevModeManager | undefined;
     /**
      * Close server
      */
