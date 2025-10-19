@@ -87,7 +87,8 @@ for f in "${FILES[@]}"; do
       DEST_DIR="$ARCHIVE_DIR/packages"
       ;;
     plan)
-      DEST_DIR="$ARCHIVE_DIR/plan"
+      # Move the entire 'plan' directory under archive/ as 'archive/plan'
+      DEST_DIR="$ARCHIVE_DIR" # destination is archive/, not archive/plan/plan
       mkdir -p "$DEST_DIR"
       ;;
     *)
@@ -98,7 +99,12 @@ for f in "${FILES[@]}"; do
 
   mkdir -p "$DEST_DIR"
   BASENAME="$(basename "$f")"
-  DEST="$DEST_DIR/$BASENAME"
+  if [ "$f" = "plan" ]; then
+    # For the directory case, move into archive/ to become archive/plan
+    DEST="$DEST_DIR"
+  else
+    DEST="$DEST_DIR/$BASENAME"
+  fi
 
   # prefer git mv to preserve history
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -117,5 +123,5 @@ for f in "${FILES[@]}"; do
 done
 
 echo
-echo "Archive complete. Run 'git status' to review changes, then commit with a clear message describing the archived content." 
+echo "Archive complete. Run 'git status' to review changes, then commit with a clear message describing the archived content."
 echo "Suggested commit message: 'chore(docs): archive legacy dev-mode docs and heavy examples to /archive'"
