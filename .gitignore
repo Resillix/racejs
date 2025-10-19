@@ -20,3 +20,126 @@ plan
 
 # ignore additional files using core.excludesFile
 # https://git-scm.com/docs/gitignore
+.racejs/index.json
+.racejs/requests/req_1760882302934_fb5o09n56.json
+.racejs/requests/req_1760882303438_ak0pv114k.json
+.racejs/requests/req_1760882303441_tsc8gklye.json
+.racejs/requests/req_1760882303444_kntvhgrnw.json
+docs/guides/websocket-custom-ui.md
+docs/dev-mode-implementation-plan.md
+docs/dev-mode-integration-review.md
+docs/dev-mode-progress.md
+docs/DEVELOPER-WORKFLOW-EXAMPLE.md
+docs/DEVMODE-STABILITY-FIXES.md
+docs/migration.md
+docs/PHASE-1-5-IMPLEMENTATION-REPORT.md
+docs/RACEJS-STORAGE-SYSTEM.md
+docs/STORAGE-FIX-SUMMARY.md
+docs/websocket-api.md
+docs/WEBSOCKET-IMPLEMENTATION-COMPLETE.md
+docs/WEBSOCKET-MODULAR-INTEGRATION-COMPLETE.md
+docs/WEBSOCKET-REFACTOR-ANALYSIS.md
+examples/08-dev-mode/.gitignore
+examples/08-dev-mode/advanced.js
+examples/08-dev-mode/basic.js
+examples/08-dev-mode/demo-app.js
+examples/08-dev-mode/DEVTOOLS-TEST-RESULTS.md
+examples/08-dev-mode/devtools-ui.js
+examples/08-dev-mode/devtools.js
+examples/08-dev-mode/monitor-ws.js
+examples/08-dev-mode/package.json
+examples/08-dev-mode/PHASE-1-5-COMPLETE.md
+examples/08-dev-mode/phase-1-5-comprehensive-test.js
+examples/08-dev-mode/README-DEMO.md
+examples/08-dev-mode/README.md
+examples/08-dev-mode/recorder.js
+examples/08-dev-mode/start-demo.sh
+examples/08-dev-mode/test-demo.sh
+examples/08-dev-mode/test-devtools-comprehensive.sh
+examples/08-dev-mode/test-devtools-realtime.sh
+examples/08-dev-mode/test-file-storage-ui.js
+examples/08-dev-mode/test-replay.js
+examples/08-dev-mode/test-requests.js
+examples/08-dev-mode/test-storage-lifecycle.sh
+examples/08-dev-mode/test-storage.js
+examples/08-dev-mode/test-ui-replay.html
+examples/08-dev-mode/test-websocket.html
+examples/08-dev-mode/test-ws-client.js
+packages/core/src/dev/STORAGE_FIX_PLAN.md
+
+# Ignore repository archive created by maintenance scripts
+archive/
+
+# Editor temporary files
+*.swp
+*.swo
+.vscode/
+.idea/
+# npm
+node_modules
+package-lock.json
+npm-shrinkwrap.json
+*.log
+*.gz
+
+# Yarn
+yarn-error.log
+yarn.lock
+
+# Coveralls
+.nyc_output
+coverage
+
+# Benchmarking
+benchmarks/graphs
+
+plan
+
+# ignore additional files using core.excludesFile
+# https://git-scm.com/docs/gitignore
+.racejs/index.json
+.racejs/requests/req_1760882302934_fb5o09n56.json
+.racejs/requests/req_1760882303438_ak0pv114k.json
+.racejs/requests/req_1760882303441_tsc8gklye.json
+.racejs/requests/req_1760882303444_kntvhgrnw.json
+docs/guides/websocket-custom-ui.md
+docs/dev-mode-implementation-plan.md
+docs/dev-mode-integration-review.md
+docs/dev-mode-progress.md
+docs/DEVELOPER-WORKFLOW-EXAMPLE.md
+docs/DEVMODE-STABILITY-FIXES.md
+docs/migration.md
+docs/PHASE-1-5-IMPLEMENTATION-REPORT.md
+docs/RACEJS-STORAGE-SYSTEM.md
+docs/STORAGE-FIX-SUMMARY.md
+docs/websocket-api.md
+docs/WEBSOCKET-IMPLEMENTATION-COMPLETE.md
+docs/WEBSOCKET-MODULAR-INTEGRATION-COMPLETE.md
+docs/WEBSOCKET-REFACTOR-ANALYSIS.md
+examples/08-dev-mode/.gitignore
+examples/08-dev-mode/advanced.js
+examples/08-dev-mode/basic.js
+examples/08-dev-mode/demo-app.js
+examples/08-dev-mode/DEVTOOLS-TEST-RESULTS.md
+examples/08-dev-mode/devtools-ui.js
+examples/08-dev-mode/devtools.js
+examples/08-dev-mode/monitor-ws.js
+examples/08-dev-mode/package.json
+examples/08-dev-mode/PHASE-1-5-COMPLETE.md
+examples/08-dev-mode/phase-1-5-comprehensive-test.js
+examples/08-dev-mode/README-DEMO.md
+examples/08-dev-mode/README.md
+examples/08-dev-mode/recorder.js
+examples/08-dev-mode/start-demo.sh
+examples/08-dev-mode/test-demo.sh
+examples/08-dev-mode/test-devtools-comprehensive.sh
+examples/08-dev-mode/test-devtools-realtime.sh
+examples/08-dev-mode/test-file-storage-ui.js
+examples/08-dev-mode/test-replay.js
+examples/08-dev-mode/test-requests.js
+examples/08-dev-mode/test-storage-lifecycle.sh
+examples/08-dev-mode/test-storage.js
+examples/08-dev-mode/test-ui-replay.html
+examples/08-dev-mode/test-websocket.html
+examples/08-dev-mode/test-ws-client.js
+packages/core/src/dev/STORAGE_FIX_PLAN.md
