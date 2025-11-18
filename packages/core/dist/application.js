@@ -178,7 +178,7 @@ export class Application {
         if (!this.compiled) {
             this.compile();
         }
-        // Start dev mode before server starts
+        // Start dev mode before server starts (async, non-blocking)
         if (this.devMode) {
             this.devMode.start().catch((err) => {
                 console.warn('⚠️  Dev mode failed to start:', err);
@@ -190,15 +190,31 @@ export class Application {
         }
         const host = typeof hostOrCallback === 'string' ? hostOrCallback : undefined;
         const cb = typeof hostOrCallback === 'function' ? hostOrCallback : callback;
-        // Wrap callback to configure dev mode after server starts
+        // Wrap callback to configure dev mode after server starts and wait for dev mode to be ready
         const wrappedCallback = () => {
-            // Configure replay engine with actual server port
+            // Wait for dev mode to be ready before configuring and calling user callback
             if (this.devMode) {
-                this.devMode.setServerInfo(port, host);
+                this.devMode
+                    .waitForReady()
+                    .then(() => {
+                    // Configure replay engine with actual server port
+                    this.devMode.setServerInfo(port, host);
+                    // Call original callback
+                    if (cb)
+                        cb();
+                })
+                    .catch((err) => {
+                    console.warn('⚠️  Dev mode initialization incomplete:', err);
+                    // Still call user callback even if dev mode fails
+                    if (cb)
+                        cb();
+                });
             }
-            // Call original callback
-            if (cb)
-                cb();
+            else {
+                // No dev mode, call callback immediately
+                if (cb)
+                    cb();
+            }
         };
         this.server = createServer((req, res) => {
             this.handleRequest(req, res);
