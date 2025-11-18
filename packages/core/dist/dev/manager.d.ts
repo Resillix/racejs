@@ -38,6 +38,9 @@ export declare class DevModeManager extends EventEmitter {
     private errorAggregator?;
     private options;
     private startTime;
+    private _isReady;
+    private _isStarting;
+    private _startPromise;
     private metrics;
     constructor(options?: boolean | DevModeOptions);
     /**
@@ -56,6 +59,23 @@ export declare class DevModeManager extends EventEmitter {
      * Get the dev logger
      */
     getLogger(): DevLogger;
+    /**
+     * Check if dev mode has completed initialization
+     * @returns true if dev mode is ready, false otherwise
+     */
+    isReady(): boolean;
+    /**
+     * Check if dev mode is currently starting
+     * @returns true if dev mode is in the process of starting
+     */
+    isStarting(): boolean;
+    /**
+     * Wait for dev mode to complete initialization
+     * If dev mode is not yet started, this will start it.
+     * If already ready, returns immediately.
+     * @returns Promise that resolves when dev mode is ready
+     */
+    waitForReady(): Promise<void>;
     /**
      * Get the request recorder (if enabled)
      */

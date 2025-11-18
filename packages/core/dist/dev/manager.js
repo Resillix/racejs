@@ -27,6 +27,10 @@ export class DevModeManager extends EventEmitter {
     errorAggregator;
     options;
     startTime = Date.now();
+    // State tracking
+    _isReady = false;
+    _isStarting = false;
+    _startPromise = undefined;
     // Metrics tracking
     metrics = {
         totalRequests: 0,
@@ -71,58 +75,83 @@ export class DevModeManager extends EventEmitter {
      * Start dev mode features
      */
     async start() {
-        this.logger.info('🚀 Dev mode starting...');
-        // Start recorder if enabled
-        if (this.recorder) {
-            await this.recorder.start();
-            this.logger.debug('Request recorder started');
+        // Already started
+        if (this._isReady) {
+            return;
         }
-        // Start profiler if enabled
-        if (this.profiler) {
-            this.profiler.start();
-            this.logger.debug('Performance profiler started');
+        // Return existing promise if already starting
+        if (this._isStarting && this._startPromise) {
+            return this._startPromise;
         }
-        // Start metrics collector if enabled
-        if (this.metricsCollector) {
-            this.metricsCollector.start();
-            this.logger.debug('Metrics collector started');
-        }
-        // Start DevTools server if enabled
-        if (this.options.devtools) {
-            this.logger.debug('DevTools option detected', { devtools: this.options.devtools });
-            const devtoolsOptions = typeof this.options.devtools === 'object' ? this.options.devtools : {};
-            if (devtoolsOptions.enabled !== false) {
-                this.logger.debug('Starting DevTools server...');
-                try {
-                    await this.startDevTools();
-                    this.logger.debug('DevTools server started successfully');
+        // Mark as starting and create promise
+        this._isStarting = true;
+        // Create and store the start promise
+        this._startPromise = (async () => {
+            try {
+                this.logger.info('🚀 Dev mode starting...');
+                // Start recorder if enabled
+                if (this.recorder) {
+                    await this.recorder.start();
+                    this.logger.debug('Request recorder started');
                 }
-                catch (error) {
-                    this.logger.error('Failed to start DevTools', {
-                        error: error instanceof Error ? error.message : String(error),
-                    });
+                // Start profiler if enabled
+                if (this.profiler) {
+                    this.profiler.start();
+                    this.logger.debug('Performance profiler started');
                 }
+                // Start metrics collector if enabled
+                if (this.metricsCollector) {
+                    this.metricsCollector.start();
+                    this.logger.debug('Metrics collector started');
+                }
+                // Start DevTools server if enabled
+                if (this.options.devtools) {
+                    this.logger.debug('DevTools option detected', { devtools: this.options.devtools });
+                    const devtoolsOptions = typeof this.options.devtools === 'object' ? this.options.devtools : {};
+                    if (devtoolsOptions.enabled !== false) {
+                        this.logger.debug('Starting DevTools server...');
+                        try {
+                            await this.startDevTools();
+                            this.logger.debug('DevTools server started successfully');
+                        }
+                        catch (error) {
+                            this.logger.error('Failed to start DevTools', {
+                                error: error instanceof Error ? error.message : String(error),
+                            });
+                        }
+                    }
+                    else {
+                        this.logger.debug('DevTools explicitly disabled');
+                    }
+                }
+                else {
+                    this.logger.debug('No DevTools configuration');
+                }
+                // Update metrics
+                this.updateMetrics();
+                // Start metrics collection interval
+                setInterval(() => this.updateMetrics(), 5000);
+                this.logger.info('✅ Dev mode ready', {
+                    features: {
+                        logger: true,
+                        devtools: !!this.devtoolsServer?.isRunning(),
+                        recorder: !!this.recorder,
+                        profiler: !!this.options.profiler,
+                    },
+                });
+                // Mark as ready before emitting events
+                this._isReady = true;
+                this._isStarting = false;
+                this.emit('started');
+                this.emit('ready');
             }
-            else {
-                this.logger.debug('DevTools explicitly disabled');
+            catch (error) {
+                this._isStarting = false;
+                this._isReady = false;
+                throw error;
             }
-        }
-        else {
-            this.logger.debug('No DevTools configuration');
-        }
-        // Update metrics
-        this.updateMetrics();
-        // Start metrics collection interval
-        setInterval(() => this.updateMetrics(), 5000);
-        this.logger.info('✅ Dev mode ready', {
-            features: {
-                logger: true,
-                devtools: !!this.devtoolsServer?.isRunning(),
-                recorder: !!this.recorder,
-                profiler: !!this.options.profiler,
-            },
-        });
-        this.emit('started');
+        })();
+        return this._startPromise;
     }
     /**
      * Stop dev mode features
@@ -145,6 +174,10 @@ export class DevModeManager extends EventEmitter {
             this.metricsCollector.stop();
             this.logger.debug('Metrics collector stopped');
         }
+        // Reset state
+        this._isReady = false;
+        this._isStarting = false;
+        this._startPromise = undefined;
         this.emit('stopped');
     }
     /**
@@ -152,6 +185,35 @@ export class DevModeManager extends EventEmitter {
      */
     getLogger() {
         return this.logger;
+    }
+    /**
+     * Check if dev mode has completed initialization
+     * @returns true if dev mode is ready, false otherwise
+     */
+    isReady() {
+        return this._isReady;
+    }
+    /**
+     * Check if dev mode is currently starting
+     * @returns true if dev mode is in the process of starting
+     */
+    isStarting() {
+        return this._isStarting;
+    }
+    /**
+     * Wait for dev mode to complete initialization
+     * If dev mode is not yet started, this will start it.
+     * If already ready, returns immediately.
+     * @returns Promise that resolves when dev mode is ready
+     */
+    async waitForReady() {
+        if (this._isReady) {
+            return;
+        }
+        if (this._isStarting && this._startPromise) {
+            return this._startPromise;
+        }
+        return this.start();
     }
     /**
      * Get the request recorder (if enabled)
