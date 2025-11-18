@@ -347,7 +347,9 @@ export class Application {
                         responseBody = Buffer.concat(chunks).toString('utf8');
                     }
                     // Record response when end is called
-                    void recorder.recordResponse(requestId, res, responseBody, performance.now()).catch(() => {
+                    void recorder
+                        .recordResponse(requestId, res, responseBody, performance.now())
+                        .catch(() => {
                         // Ignore recording errors
                     });
                     return originalEnd(chunk, ...args);
