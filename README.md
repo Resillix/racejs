@@ -171,6 +171,7 @@ Edit your code, save, and see changes instantly—just like Next.js, Vite, or Re
 
 ### Developer Experience
 - **[Dev Mode - Complete Analysis](./docs/dev-mode-analysis.md)** - Advanced developer tools
+- **[Dev Mode - Usage Guide](./docs/dev-mode-usage-guide.md)** - Practical step-by-step guide
 - [Hot Reload Guide](./docs/guides/HOT-RELOAD.md) - Zero-downtime development
 - [Hot Reload Developer API](./docs/guides/hot-reload-developer-guide.md)
 

@@ -94,6 +94,13 @@ See: **[Migration Guide](./migration.md)**
   - [Performance Profiler](./dev-mode-analysis.md#3-performance-profiler)
   - [Error Intelligence](./dev-mode-analysis.md#4-error-handler--intelligence)
   - [DevTools Browser UI](./dev-mode-analysis.md#5-devtools-browser-ui)
+- **[Dev Mode Usage Guide](./dev-mode-usage-guide.md)** - Step-by-step practical guide
+  - [Quick Start](./dev-mode-usage-guide.md#quick-start)
+  - [Request Recording & Time-Travel](./dev-mode-usage-guide.md#request-recording--time-travel-debugging)
+  - [Performance Profiling](./dev-mode-usage-guide.md#performance-profiling)
+  - [Error Intelligence](./dev-mode-usage-guide.md#error-intelligence)
+  - [Integration Examples](./dev-mode-usage-guide.md#integration-examples)
+  - [Troubleshooting](./dev-mode-usage-guide.md#troubleshooting)
 - [Hot Reload](./guides/HOT-RELOAD.md)
   - [Quick Start](./guides/HOT-RELOAD.md#quick-start)
   - [Configuration](./guides/HOT-RELOAD.md#configuration)
