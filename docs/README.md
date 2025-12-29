@@ -101,6 +101,7 @@ See: **[Migration Guide](./migration.md)**
   - [Error Intelligence](./dev-mode-usage-guide.md#error-intelligence)
   - [Integration Examples](./dev-mode-usage-guide.md#integration-examples)
   - [Troubleshooting](./dev-mode-usage-guide.md#troubleshooting)
+- **[Dev Mode Quick Reference](./dev-mode-quick-reference.md)** - Command cheat sheet
 - [Hot Reload](./guides/HOT-RELOAD.md)
   - [Quick Start](./guides/HOT-RELOAD.md#quick-start)
   - [Configuration](./guides/HOT-RELOAD.md#configuration)
