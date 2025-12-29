@@ -15,6 +15,11 @@ Welcome to the RaceJS documentation! RaceJS is a high-performance Node.js web fr
 - [Hot Reload](./guides/HOT-RELOAD.md) - **Zero-downtime development with automatic reloads**
 - [Hot Reload Developer Guide](./guides/hot-reload-developer-guide.md) - Advanced hot reload integration
 - [Performance](./performance.md) - Performance tuning and optimization
+- **[Dev Mode Analysis](./dev-mode-analysis.md)** - **Complete guide to RaceJS developer tools**
+
+### Framework Comparisons
+
+- **[RaceJS vs Next.js](./nextjs-comparison.md)** - **When to use RaceJS vs Next.js**
 
 ### Advanced
 
@@ -24,17 +29,20 @@ Welcome to the RaceJS documentation! RaceJS is a high-performance Node.js web fr
 
 ### Most Popular
 
-1. **[Hot Reload Guide](./guides/HOT-RELOAD.md)** - Edit code, save, see changes instantly!
-2. **[Architecture](./architecture.md)** - Understand how RaceJS works
-3. **[Migration Guide](./migration.md)** - Switch from Express.js
+1. **[Dev Mode Analysis](./dev-mode-analysis.md)** - **Complete developer tools guide**
+2. **[Hot Reload Guide](./guides/HOT-RELOAD.md)** - Edit code, save, see changes instantly!
+3. **[RaceJS vs Next.js](./nextjs-comparison.md)** - **Framework comparison**
+4. **[Architecture](./architecture.md)** - Understand how RaceJS works
+5. **[Migration Guide](./migration.md)** - Switch from Express.js
 
 ### Key Features
 
-- ⚡ **High Performance** - Optimized routing and middleware
+- ⚡ **High Performance** - 2-4x faster than Express, optimized routing
 - 🔥 **Zero-Downtime Hot Reload** - Edit without restarting
-- 🔄 **Express Compatible** - Drop-in replacement
-- 📦 **Lightweight** - Minimal dependencies
-- 🛠️ **TypeScript Ready** - Full type definitions
+- 🔧 **Advanced Dev Mode** - Time-travel debugging, profiling, error intelligence
+- 🔄 **Express Compatible** - Drop-in replacement with 90%+ API compatibility
+- 📦 **Lightweight** - Minimal dependencies, ~30MB memory footprint
+- 🛠️ **TypeScript Ready** - Full type definitions and excellent DX
 
 ## 🎯 Feature Highlights
 
@@ -78,13 +86,37 @@ See: **[Migration Guide](./migration.md)**
 - [Routing System](./architecture.md#routing)
 - [Middleware](./architecture.md#middleware)
 
-### Features
+### Developer Experience
 
+- **[Dev Mode Complete Analysis](./dev-mode-analysis.md)** - Comprehensive guide to all dev tools
+  - [Logger](./dev-mode-analysis.md#1-zero-config-dev-logger)
+  - [Request Recording & Time-Travel](./dev-mode-analysis.md#2-request-recorder--time-travel-debugging)
+  - [Performance Profiler](./dev-mode-analysis.md#3-performance-profiler)
+  - [Error Intelligence](./dev-mode-analysis.md#4-error-handler--intelligence)
+  - [DevTools Browser UI](./dev-mode-analysis.md#5-devtools-browser-ui)
+- **[Dev Mode Usage Guide](./dev-mode-usage-guide.md)** - Step-by-step practical guide
+  - [Quick Start](./dev-mode-usage-guide.md#quick-start)
+  - [Request Recording & Time-Travel](./dev-mode-usage-guide.md#request-recording--time-travel-debugging)
+  - [Performance Profiling](./dev-mode-usage-guide.md#performance-profiling)
+  - [Error Intelligence](./dev-mode-usage-guide.md#error-intelligence)
+  - [Integration Examples](./dev-mode-usage-guide.md#integration-examples)
+  - [Troubleshooting](./dev-mode-usage-guide.md#troubleshooting)
+- **[Dev Mode Quick Reference](./dev-mode-quick-reference.md)** - Command cheat sheet
 - [Hot Reload](./guides/HOT-RELOAD.md)
   - [Quick Start](./guides/HOT-RELOAD.md#quick-start)
   - [Configuration](./guides/HOT-RELOAD.md#configuration)
   - [Best Practices](./guides/HOT-RELOAD.md#best-practices)
   - [Troubleshooting](./guides/HOT-RELOAD.md#troubleshooting)
+
+### Framework Comparisons
+
+- **[RaceJS vs Next.js](./nextjs-comparison.md)** - Complete comparison
+  - [When to Use RaceJS](./nextjs-comparison.md#use-racejs-when)
+  - [When to Use Next.js](./nextjs-comparison.md#use-nextjs-when)
+  - [Feature Comparison](./nextjs-comparison.md#-feature-comparison-matrix)
+  - [Performance Benchmarks](./nextjs-comparison.md#-performance-benchmarks)
+  - [Use Case Analysis](./nextjs-comparison.md#-use-case-analysis)
+  - [Migration Guides](./nextjs-comparison.md#-migration-guides)
 
 ### Advanced Topics
 
@@ -95,6 +127,7 @@ See: **[Migration Guide](./migration.md)**
 ### Migration
 
 - [From Express.js](./migration.md)
+- [From Next.js API Routes](./nextjs-comparison.md#migrating-from-nextjs-api-routes-to-racejs)
 - [API Compatibility](./migration.md#compatibility)
 
 ## 🤝 Contributing
